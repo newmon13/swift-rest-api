@@ -1,8 +1,6 @@
 package dev.jlipka.swiftrestapi.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.TimeZone;
@@ -10,7 +8,9 @@ import java.util.TimeZone;
 @Document
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class Bank {
     @Id
     private String countryCode;

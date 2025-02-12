@@ -5,7 +5,6 @@ import dev.jlipka.swiftrestapi.validator.ValidationResult;
 import dev.jlipka.swiftrestapi.validator.XlsxValidator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,9 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.File;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +27,7 @@ class EntityExtractorUnitTest {
     @Mock
     XlsxValidator xlsxValidator;
     @Mock
-    SpreadsheetReader spreadsheetReader;
+    ClassPathResourceSpreadsheetReader classPathResourceSpreadsheetReader;
     @InjectMocks
     private EntityExtractor<Bank> entityExtractor;
 
@@ -51,10 +49,10 @@ class EntityExtractorUnitTest {
 
         ValidationResult validationSuccess = new ValidationResult(true, "");
 
-        doReturn(List.of(sheet)).when(spreadsheetReader).getSheets();
+        doReturn(List.of(sheet)).when(classPathResourceSpreadsheetReader).getSheets();
         doReturn(validationSuccess).when(xlsxValidator).validate(any());
         when(bankMapper.mapRowToEntity(any()))
-                .thenReturn(Bank.builder().countryCode("testValue").build());
+                .thenReturn(Optional.of(Bank.builder().countryCode("testValue").build()));
         // when
         List<Bank> extractedBanks = entityExtractor.extract(false);
         // then
@@ -72,7 +70,7 @@ class EntityExtractorUnitTest {
         Sheet sheet = workbook.createSheet();
         ValidationResult validationSuccess = new ValidationResult(true, "");
 
-        doReturn(List.of(sheet)).when(spreadsheetReader).getSheets();
+        doReturn(List.of(sheet)).when(classPathResourceSpreadsheetReader).getSheets();
         doReturn(validationSuccess).when(xlsxValidator).validate(any());
         // when
         List<Bank> extractedBanks = entityExtractor.extract(false);
@@ -91,7 +89,7 @@ class EntityExtractorUnitTest {
 
         ValidationResult validationSuccess = new ValidationResult(true, "");
 
-        doReturn(List.of(sheet)).when(spreadsheetReader).getSheets();
+        doReturn(List.of(sheet)).when(classPathResourceSpreadsheetReader).getSheets();
         doReturn(validationSuccess).when(xlsxValidator).validate(any());
         // when
         List<Bank> extractedBanks = entityExtractor.extract(true);

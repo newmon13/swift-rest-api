@@ -2,38 +2,51 @@ package dev.jlipka.swiftrestapi.mapper;
 
 import dev.jlipka.swiftrestapi.model.Bank;
 import dev.jlipka.swiftrestapi.validator.XlsxValidator;
+import org.apache.commons.math3.analysis.function.Add;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class EntityExtractorIntegrationTest {
-
     private BankMapper bankMapper;
-    private XlsxValidator xlsxValidator;
-    private SpreadsheetReader spreadsheetReader;
     private EntityExtractor<Bank> entityExtractor;
 
-
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         bankMapper = new BankMapper();
-        xlsxValidator = new XlsxValidator();
-        spreadsheetReader = new SpreadsheetReader("test.xlsx");
-        entityExtractor = new EntityExtractor<>(xlsxValidator, bankMapper, spreadsheetReader);
+        ClassPathResource classPathResource = new ClassPathResource("test.xlsx");
+        Workbook workbook = WorkbookFactory.create(classPathResource.getFile());
+        List<Sheet> sheets = new ArrayList<>();
+        workbook.sheetIterator().forEachRemaining(sheets::add);
+        entityExtractor = new EntityExtractor<>(sheets, bankMapper);
     }
 
     @Test
-    void shouldReturnProperlyMappedEntitiesFromMultipleSheets_IntegrationTest() {
+    void shouldReturnProperlyMappedEntitiesFromMultipleSheets() {
         //when
         List<Bank> extract = entityExtractor.extract(true);
         //then
         assertThat(extract.size()).isEqualTo(4);
-        assertThat(extract).isNotNull();
-        assertThat(extract).isNotEmpty();
         assertThat(extract).doesNotContainNull();
+        //first sheet
+        assertThat(extract.get(0)).hasFieldOrPropertyWithValue("countryCode", "AL")
+                .hasFieldOrPropertyWithValue("timeZone", "Europe/Tirane");
+        assertThat(extract.get(1)).hasFieldOrPropertyWithValue("countryCode", "BG")
+                .hasFieldOrPropertyWithValue("timeZone", "Europe/Sofia");
+        //second sheet
+        assertThat(extract.get(2)).hasFieldOrPropertyWithValue("countryCode", "BG")
+                .hasFieldOrPropertyWithValue("timeZone", "Europe/Sofia");
+        assertThat(extract.get(3)).hasFieldOrPropertyWithValue("countryCode", "UY")
+                .hasFieldOrPropertyWithValue("timeZone", "America/Montevideo");
+
     }
 }

@@ -3,6 +3,7 @@ package dev.jlipka.swiftrestapi.mapper;
 import dev.jlipka.swiftrestapi.error.InvalidBankDataException;
 import dev.jlipka.swiftrestapi.model.Bank;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.status.StatusConsoleListener;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.util.*;
@@ -25,6 +26,7 @@ public class BankMapper implements RowMapper<Bank> {
             this.index = index;
         }
     }
+
 
     @Override
     public Optional<Bank> mapRowToEntity(Iterator<Cell> rowCells) {

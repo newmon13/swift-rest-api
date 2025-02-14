@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.dto;
 
-public record BranchFullDetailsDto(
+public record BankFullDetailsDto(
         String address,
         String bankName,
         String countryISO2,

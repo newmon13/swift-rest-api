@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.service;
 
-import dev.jlipka.swiftrestapi.dto.BankWithBranchesDto;
+import dev.jlipka.swiftrestapi.dto.BankWithBranchesResponseDto;
 import dev.jlipka.swiftrestapi.model.Bank;
 import dev.jlipka.swiftrestapi.repository.BankRepository;
 import org.springframework.stereotype.Service;
@@ -17,9 +17,9 @@ public class BankEntityService implements EntityService<Bank> {
     }
 
 
-    public BankWithBranchesDto findBySwiftCode(String swiftCode) {
+    public BankWithBranchesResponseDto findBySwiftCode(String swiftCode) {
         List<Bank> bySwiftCode = bankRepository.findBySwiftCode(swiftCode);
-        return new BankWithBranchesDto()
+        return new BankWithBranchesResponseDto()
     }
 
     @Override

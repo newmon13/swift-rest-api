@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.controller;
 
-import dev.jlipka.swiftrestapi.dto.BankWithBranchesDto;
+import dev.jlipka.swiftrestapi.dto.BankWithBranchesResponseDto;
 import dev.jlipka.swiftrestapi.service.BankEntityService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +15,7 @@ public class BankController {
     }
 
     @GetMapping("/v1/swift-codes/{swift-code}")
-    public BankWithBranchesDto getBank(@PathVariable("swift-code") String swiftCode) {
+    public BankWithBranchesResponseDto getBank(@PathVariable("swift-code") String swiftCode) {
         return null;
     }
 

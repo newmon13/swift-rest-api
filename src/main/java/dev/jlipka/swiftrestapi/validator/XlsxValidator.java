@@ -24,10 +24,14 @@ public class XlsxValidator implements FileValidator {
     }
 
     private ValidationResult isFileTooBig(MultipartFile file) {
-        if (file.getSize() < maxSizeInMb) {
+        if (calculateSizeInBytesToMb(file.getSize()) < maxSizeInMb) {
             return ValidationResult.success("Successfully validated file");
         } else {
             return ValidationResult.error(String.format("File is too large (Max: %d MB)", maxSizeInMb));
         }
+    }
+
+    private long calculateSizeInBytesToMb(long bytes) {
+        return bytes / (1024 * 1024);
     }
 }

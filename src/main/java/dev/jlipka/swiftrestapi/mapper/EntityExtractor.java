@@ -5,30 +5,22 @@ import org.apache.poi.ss.usermodel.*;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
-public class    EntityExtractor<T> {
-    private final List<Sheet> sheets;
+public class EntityExtractor<T> {
     private final RowMapper<T> rowMapper;
-    private boolean hasHeaders;
 
-    public EntityExtractor(List<Sheet> sheets, RowMapper<T> rowMapper) {
-        this.sheets = sheets;
+    public EntityExtractor(RowMapper<T> rowMapper) {
         this.rowMapper = rowMapper;
     }
 
-    public List<T> extract(boolean hasHeaders) {
-        this.hasHeaders = hasHeaders;
-        List<T> entities = new ArrayList<>();
-        for (Sheet sheet : sheets) {
-            entities.addAll(extractSheet(sheet));
-        }
-        return entities;
+    public List<T> extract(Sheet sheet, boolean hasHeaderRow) {
+        return new ArrayList<>(extractSheet(sheet, hasHeaderRow));
     }
 
-    private List<T> extractSheet(Sheet sheet) {
+    private List<T> extractSheet(Sheet sheet, boolean hasHeaderRow) {
         List<T> entities = new ArrayList<>();
         Iterator<Row> rowIterator = eliminateBlankRows(sheet);
-        if (hasHeaders) {
-            skipHeaders(rowIterator);
+        if (hasHeaderRow) {
+            skipHeaderRow(rowIterator);
         }
 
         while (rowIterator.hasNext()) {
@@ -50,7 +42,7 @@ public class    EntityExtractor<T> {
                 .iterator();
     }
 
-    private void skipHeaders(Iterator<Row> rowIterator) {
+    private void skipHeaderRow(Iterator<Row> rowIterator) {
         rowIterator.next();
     }
 }

@@ -18,14 +18,7 @@ public class SwiftRestApiApplication {
 
     @EventListener(ApplicationStartedEvent.class)
     public void onStartup() {
-        bankRepository.save(new Bank("",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                ""));
+        bankRepository.save(new Bank("","","","","","","","",""));
 
 
     }

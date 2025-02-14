@@ -13,6 +13,7 @@ import java.util.TimeZone;
 @NoArgsConstructor
 public class Bank {
     @Id
+    private String id;
     private String countryCode;
     private String swiftCode;
     private String codeType;

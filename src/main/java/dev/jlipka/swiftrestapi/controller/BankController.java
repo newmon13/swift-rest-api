@@ -18,6 +18,4 @@ public class BankController {
     public BankWithBranchesResponseDto getBank(@PathVariable("swift-code") String swiftCode) {
         return null;
     }
-
-
 }

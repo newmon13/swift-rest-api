@@ -1,11 +1,9 @@
 package dev.jlipka.swiftrestapi.mapper;
 
-import dev.jlipka.swiftrestapi.error.InvalidBankDataException;
+import dev.jlipka.swiftrestapi.dto.BankFullDetailsDto;
 import dev.jlipka.swiftrestapi.model.Bank;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.status.StatusConsoleListener;
 import org.apache.poi.ss.usermodel.Cell;
-
 import java.util.*;
 
 @Slf4j
@@ -27,24 +25,31 @@ public class BankMapper implements RowMapper<Bank> {
         }
     }
 
+    public Bank from(BankFullDetailsDto dto) {
+        return Bank.builder()
+                .countryCode(dto.countryISO2())
+                .swiftCode(dto.swiftCode())
+                .codeType(dto.swiftCode())
+                .address(dto.address())
+                .countryName(dto.countryName())
+                .build();
+    }
 
     @Override
-    public Optional<Bank> mapRowToEntity(Iterator<Cell> rowCells) {
+    public Bank from(Iterator<Cell> rowCells) {
         Map<Integer, String> cellValues = extractCellValues(rowCells);
-        if (validateRequiredFields(cellValues)) {
-            return Optional.of(Bank.builder()
-                    .countryCode(getCellValue(cellValues, BankColumn.COUNTRY_CODE))
-                    .swiftCode(getCellValue(cellValues, BankColumn.SWIFT_CODE))
-                    .codeType(getCellValue(cellValues, BankColumn.CODE_TYPE))
-                    .name(getCellValue(cellValues, BankColumn.NAME))
-                    .address(getCellValue(cellValues, BankColumn.ADDRESS))
-                    .townName(getCellValue(cellValues, BankColumn.TOWN_NAME))
-                    .countryName(getCellValue(cellValues, BankColumn.COUNTRY_NAME))
-                    .timeZone(getCellValue(cellValues, BankColumn.TIME_ZONE))
-                    .build());
+        return Bank.builder()
+                .countryCode(getCellValue(cellValues, BankColumn.COUNTRY_CODE))
+                .swiftCode(getCellValue(cellValues, BankColumn.SWIFT_CODE))
+                .codeType(getCellValue(cellValues, BankColumn.CODE_TYPE))
+                .name(getCellValue(cellValues, BankColumn.NAME))
+                .address(getCellValue(cellValues, BankColumn.ADDRESS))
+                .townName(getCellValue(cellValues, BankColumn.TOWN_NAME))
+                .countryName(getCellValue(cellValues, BankColumn.COUNTRY_NAME))
+                .timeZone(getCellValue(cellValues, BankColumn.TIME_ZONE))
+                .build();
         }
-        return Optional.empty();
-    }
+
 
     private Map<Integer, String> extractCellValues(Iterator<Cell> rowCells) {
         Map<Integer, String> cellValues = new HashMap<>();
@@ -57,28 +62,12 @@ public class BankMapper implements RowMapper<Bank> {
         return cellValues;
     }
 
-    private String getCellValue(Map<Integer, String> cellValues, BankColumn column) {
+    private String getCellValue(Map<Integer, String> cellValues, BankMapper.BankColumn column) {
         String value = cellValues.get(column.index);
         if (value == null || value.isBlank()) {
             return null;
         } else {
             return value.strip();
         }
-    }
-
-    private boolean validateRequiredFields(Map<Integer, String> cellValues) {
-        List<String> missingFields = new ArrayList<>();
-
-        if (getCellValue(cellValues, BankColumn.COUNTRY_CODE) == null) {
-            missingFields.add("Country Code");
-        }
-        if (getCellValue(cellValues, BankColumn.SWIFT_CODE) == null) {
-            missingFields.add("Swift Code");
-        }
-        if (getCellValue(cellValues, BankColumn.CODE_TYPE) == null) {
-            missingFields.add("Code Type");
-        }
-
-        return missingFields.isEmpty();
     }
 }

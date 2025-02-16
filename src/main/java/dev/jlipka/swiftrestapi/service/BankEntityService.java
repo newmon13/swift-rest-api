@@ -4,6 +4,10 @@ import dev.jlipka.swiftrestapi.dto.BankFullDetailsDto;
 import dev.jlipka.swiftrestapi.dto.BankRegistrationResponseDto;
 import dev.jlipka.swiftrestapi.dto.BankWithBranchesResponseDto;
 import dev.jlipka.swiftrestapi.error.BankNotFoundException;
+import dev.jlipka.swiftrestapi.mapper.BankDetailsResponseDtoMapper;
+import dev.jlipka.swiftrestapi.mapper.BankFullResponseDtoMapper;
+import dev.jlipka.swiftrestapi.mapper.BankWithBranchesResponseDtoMapper;
+import dev.jlipka.swiftrestapi.mapper.CountryWithBanksResponseDtoMapper;
 import dev.jlipka.swiftrestapi.model.Bank;
 import dev.jlipka.swiftrestapi.repository.BankRepository;
 import org.springframework.stereotype.Service;
@@ -13,35 +17,43 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 
 @Service
 public class BankEntityService implements EntityService<Bank> {
     private static final int EXTENDED_SWIFT_CODE_LENGTH = 11;
     private static final int DEFAULT_SWIFT_CODE_LENGTH = 8;
-    private final BankRepository bankRepository;
-    private final BankDtoMapper bankDtoMapper;
 
-    public BankEntityService(BankRepository bankRepository) {
+    private final BankRepository bankRepository;
+    private final BankDetailsResponseDtoMapper bankDetailsMapper;
+    private final BankFullResponseDtoMapper bankFullMapper;
+    private final BankWithBranchesResponseDtoMapper bankWithBranchesMapper;
+    private final CountryWithBanksResponseDtoMapper countryWithBanksMapper;
+
+    public BankEntityService(BankRepository bankRepository,
+                             BankDetailsResponseDtoMapper bankDetailsMapper,
+                             BankFullResponseDtoMapper bankFullMapper,
+                             BankWithBranchesResponseDtoMapper bankWithBranchesMapper,
+                             CountryWithBanksResponseDtoMapper countryWithBanksMapper) {
         this.bankRepository = bankRepository;
-        this.bankDtoMapper = new BankDtoMapper();
+        this.bankDetailsMapper = bankDetailsMapper;
+        this.bankFullMapper = bankFullMapper;
+        this.bankWithBranchesMapper = bankWithBranchesMapper;
+        this.countryWithBanksMapper = countryWithBanksMapper;
     }
+
     public BankWithBranchesResponseDto findBySwiftCode(String swiftCode) {
         Bank foundBank = bankRepository.findBySwiftCode(swiftCode)
                 .orElseThrow(() -> new BankNotFoundException("Bank not found for SWIFT code: " + swiftCode));
-
-        return bankDtoMapper.mapToBankWithBranchesResponseDto(foundBank, getBankBranches(foundBank));
+        return bankWithBranchesMapper.apply(foundBank, getBankBranches(foundBank));
     }
 
     private List<Bank> getBankBranches(Bank bank) {
-        if (isHeadquarter(bank)) {
+        if (isNull(bank.getHeadquarter())) {
             return bankRepository.getAllByHeadquarter(bank);
         } else {
             return emptyList();
         }
-    }
-
-    private boolean isHeadquarter(Bank bank) {
-        return Objects.isNull(bank.getHeadquarter());
     }
 
     public BankRegistrationResponseDto registerBank(BankFullDetailsDto bankFullDetailsDto) {

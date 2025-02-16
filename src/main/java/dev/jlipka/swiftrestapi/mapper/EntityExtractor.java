@@ -26,8 +26,8 @@ public class EntityExtractor<T> {
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
             Iterator<Cell> cellIterator = row.cellIterator();
-            Optional<T> entity = rowMapper.mapRowToEntity(cellIterator);
-            entity.ifPresent(entities::add);
+            T entity = rowMapper.from(cellIterator);
+            entities.add(entity);
         }
         return entities;
     }

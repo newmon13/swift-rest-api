@@ -1,37 +1,45 @@
 package dev.jlipka.swiftrestapi.validator;
 
 import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
 @Component
-public class XlsxValidator implements FileValidator {
+public class XlsxValidator implements Validator {
     private static final int maxSizeInMb = 5;
 
     @Override
-    public ValidationResult validate(MultipartFile file) {
-        return isXlsxFile(file);
+    public boolean supports(Class<?> clazz) {
+        return MultipartFile.class.equals(clazz);
     }
 
-    private ValidationResult isXlsxFile(MultipartFile file) {
-        if (Objects.requireNonNull(file.getOriginalFilename())
-                .toLowerCase().endsWith(".xlsx")) {
-            return isFileTooBig(file);
-        } else {
-            return ValidationResult.error("File is not .xlsx");
+    @Override
+    public void validate(Object target, Errors errors) {
+        MultipartFile file = (MultipartFile) target;
+
+        if (!isXlsxFile(file)) {
+            errors.reject("file.invalid.format", "File must be in XLSX format");
+        }
+
+        if (!isFileTooBig(file)) {
+            errors.reject("file.too.large",
+                    String.format("File is too large (Max: %d MB)", maxSizeInMb));
         }
     }
 
-    private ValidationResult isFileTooBig(MultipartFile file) {
-        if (calculateSizeInBytesToMb(file.getSize()) < maxSizeInMb) {
-            return ValidationResult.success("Successfully validated file");
-        } else {
-            return ValidationResult.error(String.format("File is too large (Max: %d MB)", maxSizeInMb));
-        }
+    private boolean isXlsxFile(MultipartFile file) {
+        return (requireNonNull(file.getOriginalFilename())
+                .toLowerCase().endsWith(".xlsx"));
     }
 
-    private long calculateSizeInBytesToMb(long bytes) {
+    private boolean isFileTooBig(MultipartFile file) {
+       return convertBytesToMegaBytes(file.getSize()) >= maxSizeInMb);
+    }
+
+    private long convertBytesToMegaBytes(long bytes) {
         return bytes / (1024 * 1024);
     }
 }

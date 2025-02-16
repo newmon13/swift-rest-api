@@ -4,9 +4,12 @@ import dev.jlipka.swiftrestapi.dto.BankFullDetailsDto;
 import dev.jlipka.swiftrestapi.model.Bank;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
+import org.springframework.stereotype.Component;
+
 import java.util.*;
 
 @Slf4j
+@Component
 public class BankMapper implements RowMapper<Bank> {
     private enum BankColumn {
         COUNTRY_CODE(0),

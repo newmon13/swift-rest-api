@@ -35,11 +35,11 @@ public class SwiftCodeValidator implements Validator {
         String branchCode = swiftCode.substring(8);
 
         isLengthCorrect(swiftCode, errors);
-        validateBankCode(bankCode, errors);
+        isBankCodeValid(bankCode, errors);
         invokeValidator(countryCodeValidator, countryCode, errors);
 
-        validateLocationCode(locationCode, errors);
-        validateBranchCode(branchCode, errors);
+        isLocationCodeValid(locationCode, errors);
+        isBranchCodeValid(branchCode, errors);
     }
 
     private void isLengthCorrect(String swiftCode, Errors errors) {
@@ -48,20 +48,20 @@ public class SwiftCodeValidator implements Validator {
         }
     }
 
-    private void validateBankCode(String bankCode, Errors errors) {
+    private void isBankCodeValid(String bankCode, Errors errors) {
         if (!bankCode.matches("^[A-Z]{4}$")) {
             errors.reject("swift-code.bank-code.invalid", "Bank code must contain 4 letters");
         }
     }
 
-    private void validateLocationCode(String locationCode, Errors errors) {
+    private void isLocationCodeValid(String locationCode, Errors errors) {
         if (!locationCode.matches("^[A-Z0-9]{2}$")) {
             errors.reject("swift-code.location-code.invalid",
                     "Location code must contain 2 alphanumeric characters");
         }
     }
 
-    private void validateBranchCode(String branchCode, Errors errors) {
+    private void isBranchCodeValid(String branchCode, Errors errors) {
         if (!branchCode.matches("^(XXX|[A-Z0-9]{3})$")) {
             errors.reject("swift-code.branch-code.invalid",
                     "Branch code must be 'XXX' for head office or 3 alphanumeric characters");

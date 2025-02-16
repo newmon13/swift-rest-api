@@ -14,4 +14,8 @@ public interface BankRepository extends MongoRepository<Bank, String> {
     Optional<Bank> findBySwiftCode(String swiftCode);
 
     List<Bank> getAllByHeadquarter(Bank headquarter);
+
+    List<Bank> findByCountryCode(String countryCode);
+
+    void deleteBySwiftCode(String swiftCode);
 }

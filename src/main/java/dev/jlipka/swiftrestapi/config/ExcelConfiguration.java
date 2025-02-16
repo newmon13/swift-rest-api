@@ -8,6 +8,7 @@ import dev.jlipka.swiftrestapi.model.Bank;
 import dev.jlipka.swiftrestapi.service.EntityService;
 import dev.jlipka.swiftrestapi.service.ExcelService;
 import dev.jlipka.swiftrestapi.service.ExcelServiceFactory;
+import dev.jlipka.swiftrestapi.validator.XlsxValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,8 +23,9 @@ public class ExcelConfiguration {
     public ExcelService<Bank> bankExcelService(ExcelServiceFactory excelServiceFactory,
                                                EntityExtractor<Bank> bankEntityExtractor,
                                                EntityService<Bank> bankEntityService,
-                                               ExcelReader excelReader) {
-        return excelServiceFactory.createService(bankEntityExtractor, bankEntityService, excelReader);
+                                               ExcelReader excelReader,
+                                               XlsxValidator xlsxValidator) {
+        return excelServiceFactory.createService(bankEntityExtractor, bankEntityService, excelReader, xlsxValidator);
     }
 
     @Bean

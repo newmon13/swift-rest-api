@@ -20,23 +20,21 @@ public class XlsxValidator implements Validator {
     public void validate(Object target, Errors errors) {
         MultipartFile file = (MultipartFile) target;
 
-        if (!isXlsxFile(file)) {
+        isXlsxFile(file, errors);
+        isFileTooBig(file, errors);
+    }
+
+    private void isXlsxFile(MultipartFile file, Errors errors) {
+        if (!requireNonNull(file.getOriginalFilename()).toLowerCase().endsWith(".xlsx")) {
             errors.reject("file.invalid.format", "File must be in XLSX format");
         }
+    }
 
-        if (!isFileTooBig(file)) {
+    private void isFileTooBig(MultipartFile file, Errors errors) {
+        if (convertBytesToMegaBytes(file.getSize()) >= maxSizeInMb) {
             errors.reject("file.too.large",
                     String.format("File is too large (Max: %d MB)", maxSizeInMb));
         }
-    }
-
-    private boolean isXlsxFile(MultipartFile file) {
-        return (requireNonNull(file.getOriginalFilename())
-                .toLowerCase().endsWith(".xlsx"));
-    }
-
-    private boolean isFileTooBig(MultipartFile file) {
-       return convertBytesToMegaBytes(file.getSize()) >= maxSizeInMb);
     }
 
     private long convertBytesToMegaBytes(long bytes) {

@@ -16,10 +16,4 @@ public class SwiftRestApiApplication {
         SpringApplication.run(SwiftRestApiApplication.class, args);
     }
 
-    @EventListener(ApplicationStartedEvent.class)
-    public void onStartup() {
-        bankRepository.save(new Bank("","","","","","","","",""));
-
-
-    }
 }

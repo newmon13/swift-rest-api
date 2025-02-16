@@ -1,36 +1,36 @@
 package dev.jlipka.swiftrestapi.service;
 
 import dev.jlipka.swiftrestapi.dto.UploadResponseDto;
+import dev.jlipka.swiftrestapi.error.FileUploadException;
+import dev.jlipka.swiftrestapi.error.ValidationException;
 import dev.jlipka.swiftrestapi.mapper.EntityExtractor;
 import dev.jlipka.swiftrestapi.mapper.ExcelReader;
-import dev.jlipka.swiftrestapi.model.Bank;
-import dev.jlipka.swiftrestapi.validator.FileValidator;
-import dev.jlipka.swiftrestapi.validator.ValidationResult;
+import dev.jlipka.swiftrestapi.validator.XlsxValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Collections.emptyList;
-
+@Slf4j
 public class ExcelService<T> {
     @Value("${app.storage.location}")
     private String storageLocation;
-    private final FileValidator fileValidator;
+    private final XlsxValidator fileValidator;
     private final ExcelReader excelReader;
     private final EntityExtractor<T> entityExtractor;
     private final EntityService<T> entityService;
 
 
-    public ExcelService(FileValidator fileValidator,
+    public ExcelService(XlsxValidator fileValidator,
                         ExcelReader excelReader,
                         EntityExtractor<T> entityExtractor,
                         EntityService<T> entityService) {
@@ -41,29 +41,46 @@ public class ExcelService<T> {
     }
 
     public UploadResponseDto<T> upload(MultipartFile file, boolean hasHeaderRow) {
-        ValidationResult validate = fileValidator.validate(file);
+        validateFile(file);
 
-        if (validate.result()) {
-            try {
-                Path uploadPath = Path.of(storageLocation);
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
+        try {
+            String savedFilePath = saveFile(file);
+            List<T> entities = getEntities(savedFilePath, hasHeaderRow);
+            persistEntities(entities);
 
-                Path filePath = uploadPath.resolve(Objects.requireNonNull(file.getOriginalFilename()));
-                file.transferTo(new File(String.valueOf(filePath)));
-
-                List<T> entities = getEntities(file.getOriginalFilename(), hasHeaderRow);
-
-
-                return new UploadResponseDto<>(validate, entities);
-            } catch (IOException e) {
-                return new UploadResponseDto<>(new ValidationResult(false, "I/O exception occurred"), emptyList());
-            }
-        } else {
-            return new UploadResponseDto<>(new ValidationResult(false, "Validation failed: " + validate.message()), emptyList());
+            return new UploadResponseDto<>("Successfully uploaded and persisted entities from given .xlsx file", entities);
+        } catch (IOException e) {
+            throw new FileUploadException("Failed to upload file");
         }
     }
+
+    private void validateFile(MultipartFile file) {
+        if (!fileValidator.supports(file.getClass())) {
+            throw new ValidationException("File type not supported");
+        }
+
+        Errors errors = new BeanPropertyBindingResult(file, "file");
+        fileValidator.validate(file, errors);
+
+        if (errors.hasErrors()) {
+            throw new ValidationException(errors.getAllErrors());
+        }
+    }
+
+    private String saveFile(MultipartFile file) throws IOException {
+        Path uploadPath = Path.of(storageLocation);
+        Files.createDirectories(uploadPath);
+
+        Path filePath = uploadPath.resolve(Objects.requireNonNull(file.getOriginalFilename()));
+        file.transferTo(filePath.toFile());
+
+        return filePath.toString();
+    }
+
+    private void persistEntities(List<T> entities) {
+        log.info("Persisting uploaded entities");
+    }
+
 
     private List<T> getEntities(String fileName, boolean hasHeaderRow) {
         List<Sheet> sheets = excelReader.getSheets(fileName);

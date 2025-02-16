@@ -6,11 +6,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
-import java.util.Arrays;
-import java.util.Locale;
-
-import static org.springframework.validation.ValidationUtils.invokeValidator;
-
 @Component
 public class BankValidator implements Validator {
     private final Validator swiftCodeValidator;

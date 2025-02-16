@@ -9,8 +9,6 @@ import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 import static java.util.Locale.getISOCountries;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Component
 public class CountryCodeValidator implements Validator {
@@ -26,12 +24,12 @@ public class CountryCodeValidator implements Validator {
     public void validate(Object target, Errors errors) {
         String countryCode = (String) target;
 
-        if (!COUNTRY_CODE_PATTERN.matcher(countryCode).matches()) {
+        if (!isValid(countryCode)) {
             errors.reject("country.code.format", "Format of country code is not valid");
             return;
         }
 
-        if (!ISO_COUNTRIES.contains(countryCode)) {
+        if (!exists(countryCode)) {
             errors.reject("country.code.not.found", "No country with given country code was found");
         }
     }

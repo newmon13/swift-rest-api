@@ -1,9 +1,10 @@
 package dev.jlipka.swiftrestapi.api.controller;
 
-import dev.jlipka.swiftrestapi.dto.BankFullDetailsDto;
-import dev.jlipka.swiftrestapi.dto.BankWithBranchesResponseDto;
-import dev.jlipka.swiftrestapi.dto.CountryWithBanksResponseDto;
-import dev.jlipka.swiftrestapi.dto.CrudOperationResponseDto;
+
+import dev.jlipka.swiftrestapi.api.dto.BankFullDetailsDto;
+import dev.jlipka.swiftrestapi.api.dto.BankWithBranchesResponseDto;
+import dev.jlipka.swiftrestapi.api.dto.CountryWithBanksResponseDto;
+import dev.jlipka.swiftrestapi.api.dto.CrudOperationResponseDto;
 import dev.jlipka.swiftrestapi.service.BankEntityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

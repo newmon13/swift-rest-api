@@ -1,9 +1,12 @@
 package dev.jlipka.swiftrestapi.service;
 
+import dev.jlipka.swiftrestapi.api.dto.BankFullDetailsDto;
+import dev.jlipka.swiftrestapi.api.dto.BankWithBranchesResponseDto;
+import dev.jlipka.swiftrestapi.api.dto.CountryWithBanksResponseDto;
+import dev.jlipka.swiftrestapi.api.dto.CrudOperationResponseDto;
 import dev.jlipka.swiftrestapi.api.mapper.BankMapper;
 import dev.jlipka.swiftrestapi.api.mapper.BankWithBranchesResponseDtoMapper;
 import dev.jlipka.swiftrestapi.api.mapper.CountryWithBanksResponseDtoMapper;
-import dev.jlipka.swiftrestapi.dto.*;
 import dev.jlipka.swiftrestapi.infrastructure.error.BankNotFoundException;
 import dev.jlipka.swiftrestapi.infrastructure.error.DuplicateResourceException;
 import dev.jlipka.swiftrestapi.infrastructure.error.ValidationException;

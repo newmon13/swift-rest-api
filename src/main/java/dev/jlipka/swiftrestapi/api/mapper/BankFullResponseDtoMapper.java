@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.api.mapper;
 
-import dev.jlipka.swiftrestapi.dto.BankFullDetailsDto;
+import dev.jlipka.swiftrestapi.api.dto.BankFullDetailsDto;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import org.springframework.stereotype.Component;
 

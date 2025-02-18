@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.api.mapper;
 
-import dev.jlipka.swiftrestapi.dto.BankFullDetailsDto;
+import dev.jlipka.swiftrestapi.api.dto.BankFullDetailsDto;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;

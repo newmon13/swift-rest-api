@@ -1,7 +1,8 @@
 package dev.jlipka.swiftrestapi.api.mapper;
 
-import dev.jlipka.swiftrestapi.dto.BankDetailsResponseDto;
-import dev.jlipka.swiftrestapi.dto.BankWithBranchesResponseDto;
+
+import dev.jlipka.swiftrestapi.api.dto.BankDetailsResponseDto;
+import dev.jlipka.swiftrestapi.api.dto.BankWithBranchesResponseDto;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import org.springframework.stereotype.Component;
 

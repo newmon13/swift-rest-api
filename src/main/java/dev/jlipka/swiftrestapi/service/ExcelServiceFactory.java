@@ -1,8 +1,8 @@
 package dev.jlipka.swiftrestapi.service;
 
-import dev.jlipka.swiftrestapi.mapper.EntityExtractor;
-import dev.jlipka.swiftrestapi.mapper.ExcelReader;
-import dev.jlipka.swiftrestapi.validator.SpreadsheetFileValidator;
+import dev.jlipka.swiftrestapi.domain.logic.EntityExtractor;
+import dev.jlipka.swiftrestapi.domain.logic.ExcelReader;
+import dev.jlipka.swiftrestapi.api.validator.SpreadsheetFileValidator;
 import org.springframework.stereotype.Component;
 
 @Component

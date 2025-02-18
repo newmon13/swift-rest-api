@@ -1,15 +1,17 @@
 package dev.jlipka.swiftrestapi.service;
 
+import dev.jlipka.swiftrestapi.api.mapper.BankMapper;
+import dev.jlipka.swiftrestapi.api.mapper.BankWithBranchesResponseDtoMapper;
+import dev.jlipka.swiftrestapi.api.mapper.CountryWithBanksResponseDtoMapper;
 import dev.jlipka.swiftrestapi.dto.*;
-import dev.jlipka.swiftrestapi.error.BankNotFoundException;
-import dev.jlipka.swiftrestapi.error.DuplicateResourceException;
-import dev.jlipka.swiftrestapi.error.ValidationException;
-import dev.jlipka.swiftrestapi.mapper.*;
-import dev.jlipka.swiftrestapi.model.Bank;
+import dev.jlipka.swiftrestapi.infrastructure.error.BankNotFoundException;
+import dev.jlipka.swiftrestapi.infrastructure.error.DuplicateResourceException;
+import dev.jlipka.swiftrestapi.infrastructure.error.ValidationException;
+import dev.jlipka.swiftrestapi.domain.model.Bank;
 import dev.jlipka.swiftrestapi.repository.BankRepository;
-import dev.jlipka.swiftrestapi.validator.BankValidator;
-import dev.jlipka.swiftrestapi.validator.CountryCodeValidator;
-import dev.jlipka.swiftrestapi.validator.SwiftCodeValidator;
+import dev.jlipka.swiftrestapi.api.validator.BankValidator;
+import dev.jlipka.swiftrestapi.api.validator.CountryCodeValidator;
+import dev.jlipka.swiftrestapi.api.validator.SwiftCodeValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.*;
 
@@ -27,23 +29,17 @@ public class BankEntityService implements EntityService<Bank> {
     private final BankRepository bankRepository;
     private final BankValidator bankValidator;
     private final BankMapper bankMapper;
-    private final BankDetailsResponseDtoMapper bankDetailsMapper;
-    private final BankFullResponseDtoMapper bankFullMapper;
     private final BankWithBranchesResponseDtoMapper bankWithBranchesMapper;
     private final CountryWithBanksResponseDtoMapper countryWithBanksMapper;
     private final CountryCodeValidator countryCodeValidator;
     private final SwiftCodeValidator swiftCodeValidator;
 
     public BankEntityService(BankRepository bankRepository, BankValidator bankValidator, BankMapper bankMapper,
-                             BankDetailsResponseDtoMapper bankDetailsMapper,
-                             BankFullResponseDtoMapper bankFullMapper,
                              BankWithBranchesResponseDtoMapper bankWithBranchesMapper,
                              CountryWithBanksResponseDtoMapper countryWithBanksMapper, CountryCodeValidator countryCodeValidator, SwiftCodeValidator swiftCodeValidator) {
         this.bankRepository = bankRepository;
         this.bankValidator = bankValidator;
         this.bankMapper = bankMapper;
-        this.bankDetailsMapper = bankDetailsMapper;
-        this.bankFullMapper = bankFullMapper;
         this.bankWithBranchesMapper = bankWithBranchesMapper;
         this.countryWithBanksMapper = countryWithBanksMapper;
         this.countryCodeValidator = countryCodeValidator;
@@ -112,18 +108,9 @@ public class BankEntityService implements EntityService<Bank> {
     }
 
     private Optional<Bank> getHeadquarter(String swiftCode) {
-        int swiftCodeLength = swiftCode.length();
-        if (swiftCodeLength == EXTENDED_SWIFT_CODE_LENGTH) {
-            String headquarterSwiftCode = getHeadquarterCode(swiftCode);
-            return bankRepository.findBySwiftCode(headquarterSwiftCode);
-        } else if (swiftCodeLength == DEFAULT_SWIFT_CODE_LENGTH) {
-            return bankRepository.findBySwiftCode(swiftCode);
-        } else {
-            return Optional.empty();
-        }
-    }
-    private String getHeadquarterCode(String swiftCode) {
-        return swiftCode.substring(0, DEFAULT_SWIFT_CODE_LENGTH + 1);
+        String headquarterPrefix = swiftCode.substring(0, DEFAULT_SWIFT_CODE_LENGTH);
+        String headquarterSwiftCode = headquarterPrefix + "XXX";
+        return bankRepository.findBySwiftCode(headquarterSwiftCode);
     }
 
     private Bank assignHeadquarterToBranch(Optional<Bank> headquarter, Bank branch) {

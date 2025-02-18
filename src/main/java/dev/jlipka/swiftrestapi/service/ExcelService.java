@@ -1,11 +1,11 @@
 package dev.jlipka.swiftrestapi.service;
 
-import dev.jlipka.swiftrestapi.dto.UploadResponseDto;
-import dev.jlipka.swiftrestapi.error.FileUploadException;
-import dev.jlipka.swiftrestapi.error.ValidationException;
-import dev.jlipka.swiftrestapi.mapper.EntityExtractor;
-import dev.jlipka.swiftrestapi.mapper.ExcelReader;
-import dev.jlipka.swiftrestapi.validator.SpreadsheetFileValidator;
+import dev.jlipka.swiftrestapi.api.dto.UploadResponseDto;
+import dev.jlipka.swiftrestapi.domain.logic.EntityExtractor;
+import dev.jlipka.swiftrestapi.infrastructure.error.FileUploadException;
+import dev.jlipka.swiftrestapi.infrastructure.error.ValidationException;
+import dev.jlipka.swiftrestapi.domain.logic.ExcelReader;
+import dev.jlipka.swiftrestapi.api.validator.SpreadsheetFileValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 
 @Slf4j
 public class ExcelService<T> {

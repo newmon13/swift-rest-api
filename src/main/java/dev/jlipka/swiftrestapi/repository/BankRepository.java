@@ -1,7 +1,6 @@
 package dev.jlipka.swiftrestapi.repository;
 
-import dev.jlipka.swiftrestapi.dto.BankWithBranchesResponseDto;
-import dev.jlipka.swiftrestapi.model.Bank;
+import dev.jlipka.swiftrestapi.domain.model.Bank;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

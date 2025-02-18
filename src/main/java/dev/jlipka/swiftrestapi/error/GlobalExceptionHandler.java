@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
@@ -18,6 +17,16 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleBankNotFoundException(BankNotFoundException ex) {
         return new ErrorResponse(
                 HttpStatus.NOT_FOUND.name(),
+                ex.getMessage(),
+                Timestamp.from(Instant.now())
+        );
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleDuplicateResource(DuplicateResourceException ex) {
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.name(),
                 ex.getMessage(),
                 Timestamp.from(Instant.now())
         );
@@ -36,6 +45,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(ValidationException ex) {
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.name(),
+                ex.getMessage(),
+                Timestamp.from(Instant.now())
+        );
+    }
+
+
+    @ExceptionHandler(UnsupportedFileTypeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnsupportedFileTypeException(UnsupportedFileTypeException ex) {
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.name(),
                 ex.getMessage(),

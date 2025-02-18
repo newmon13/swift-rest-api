@@ -47,7 +47,6 @@ class BankMapperTest {
         assertThat(bank.getCodeType()).isEqualTo("BIC11");
     }
 
-
     @Test
     public void shouldNotMapRowWithMissingRequiredCellsToBank() {
         //given

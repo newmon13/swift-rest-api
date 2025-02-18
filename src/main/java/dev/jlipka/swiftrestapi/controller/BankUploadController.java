@@ -19,9 +19,9 @@ public class BankUploadController {
         this.excelService = excelService;
     }
 
-    @PostMapping(value = "/excel/bank/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UploadResponseDto<Bank> importExcelFile(@RequestParam("file") MultipartFile file,
-                                             @RequestParam("has-header-row") boolean hasHeaderRow) {
-        return excelService.upload(file, hasHeaderRow);
+    @PostMapping(value = "/excel/bank/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public UploadResponseDto<Bank> importFile(@RequestParam("file") MultipartFile file,
+                                              @RequestParam("has-header-row") boolean hasHeaderRow) {
+        return excelService.importFile(file, hasHeaderRow);
     }
 }

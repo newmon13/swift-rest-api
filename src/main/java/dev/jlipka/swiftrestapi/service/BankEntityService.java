@@ -18,7 +18,6 @@ import java.util.*;
 import static java.util.Collections.emptyList;
 import static java.util.Locale.of;
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Service
 public class BankEntityService implements EntityService<Bank> {
@@ -145,14 +144,17 @@ public class BankEntityService implements EntityService<Bank> {
 
     @Override
     public Bank save(Bank entity) {
-        if (bankValidator.supports(entity.getClass())) {
-            Errors errors = new BeanPropertyBindingResult(entity, "bank");
-            bankValidator.validate(entity, errors);
-
-            if (errors.hasErrors()) {
-                throw new ValidationException(errors.getAllErrors());
-            }
+        if (!bankValidator.supports(entity.getClass())) {
+            throw new IllegalArgumentException("No validator found for entity type");
         }
+
+        Errors errors = new BeanPropertyBindingResult(entity, "bank");
+        bankValidator.validate(entity, errors);
+
+        if (errors.hasErrors()) {
+            throw new ValidationException(errors.getAllErrors());
+        }
+
         return bankRepository.save(entity);
     }
 

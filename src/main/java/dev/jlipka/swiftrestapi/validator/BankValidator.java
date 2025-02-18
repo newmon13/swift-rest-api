@@ -31,8 +31,8 @@ public class BankValidator implements Validator {
     public void validate(Object target, Errors errors) {
         Bank bank = (Bank) target;
 
-        ValidationUtils.rejectIfEmpty(errors, "countryCode", "country.code.empty");
-        ValidationUtils.rejectIfEmpty(errors, "swiftCode", "swift.code.empty");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "countryCode", "country.code.empty");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "swiftCode", "swift.code.empty");
 
         if (errors.hasErrors()) {
             return;

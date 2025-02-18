@@ -5,10 +5,11 @@ import dev.jlipka.swiftrestapi.error.FileUploadException;
 import dev.jlipka.swiftrestapi.error.ValidationException;
 import dev.jlipka.swiftrestapi.mapper.EntityExtractor;
 import dev.jlipka.swiftrestapi.mapper.ExcelReader;
-import dev.jlipka.swiftrestapi.validator.XlsxValidator;
+import dev.jlipka.swiftrestapi.validator.SpreadsheetFileValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,13 +25,12 @@ import java.util.Objects;
 public class ExcelService<T> {
     @Value("${app.storage.location}")
     private String storageLocation;
-    private final XlsxValidator fileValidator;
+    private final SpreadsheetFileValidator fileValidator;
     private final ExcelReader excelReader;
     private final EntityExtractor<T> entityExtractor;
     private final EntityService<T> entityService;
 
-
-    public ExcelService(XlsxValidator fileValidator,
+    public ExcelService(SpreadsheetFileValidator fileValidator,
                         ExcelReader excelReader,
                         EntityExtractor<T> entityExtractor,
                         EntityService<T> entityService) {
@@ -40,17 +40,21 @@ public class ExcelService<T> {
         this.entityService = entityService;
     }
 
-    public UploadResponseDto<T> upload(MultipartFile file, boolean hasHeaderRow) {
+    @Transactional
+    public UploadResponseDto<T> importFile(MultipartFile file, boolean hasHeaderRow) {
         validateFile(file);
-
+        Path filePath = null;
         try {
-            String savedFilePath = saveFile(file);
-            List<T> entities = getEntities(savedFilePath, hasHeaderRow);
-            persistEntities(entities);
-
-            return new UploadResponseDto<>("Successfully uploaded and persisted entities from given .xlsx file", entities);
+            filePath = Path.of(saveFile(file));
+            List<T> entities = getEntities(filePath.toString(), hasHeaderRow);
+            List<T> savedEntities = persistEntities(entities);
+            return new UploadResponseDto<>("Successfully uploaded and persisted entities from given file",
+                    entities.size(),
+                    savedEntities.size());
         } catch (IOException e) {
-            throw new FileUploadException("Failed to upload file");
+            throw new FileUploadException("Failed to upload file: " + e.getMessage());
+        } finally {
+            cleanupFile(filePath);
         }
     }
 
@@ -77,10 +81,11 @@ public class ExcelService<T> {
         return filePath.toString();
     }
 
-    private void persistEntities(List<T> entities) {
-        log.info("Persisting uploaded entities");
+    private List<T> persistEntities(List<T> entities) {
+        return entities.stream()
+                .map(entityService::save)
+                .toList();
     }
-
 
     private List<T> getEntities(String fileName, boolean hasHeaderRow) {
         List<Sheet> sheets = excelReader.getSheets(fileName);
@@ -94,5 +99,13 @@ public class ExcelService<T> {
         return entities;
     }
 
-
+    private void cleanupFile(Path filePath) {
+        if (filePath != null) {
+            try {
+                Files.deleteIfExists(filePath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

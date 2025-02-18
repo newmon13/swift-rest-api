@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.api.controller;
 
-import dev.jlipka.swiftrestapi.api.dto.UploadResponseDto;
+import dev.jlipka.swiftrestapi.api.dto.ImportResult;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import dev.jlipka.swiftrestapi.service.ExcelService;
 import org.springframework.http.MediaType;
@@ -12,16 +12,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Validated
-public class BankUploadController {
+public class BankImportController {
     private final ExcelService<Bank> excelService;
 
-    public BankUploadController(ExcelService<Bank> excelService) {
+    public BankImportController(ExcelService<Bank> excelService) {
         this.excelService = excelService;
     }
 
     @PostMapping(value = "/excel/bank/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UploadResponseDto<Bank> importFile(@RequestParam("file") MultipartFile file,
-                                              @RequestParam("has-header-row") boolean hasHeaderRow) {
+    public ImportResult importFile(@RequestParam("file") MultipartFile file,
+                                         @RequestParam("has-header-row") boolean hasHeaderRow) {
         return excelService.importFile(file, hasHeaderRow);
     }
 }

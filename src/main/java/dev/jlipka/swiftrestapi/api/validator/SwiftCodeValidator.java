@@ -44,7 +44,7 @@ public class SwiftCodeValidator implements Validator {
 
     private void isLengthCorrect(String swiftCode, Errors errors) {
         if (swiftCode.length() != 11) {
-            errors.reject("swift-code.length.invalid");
+            errors.reject("swift-code.length.invalid", "SWIFT code must be 11 characters long");
         }
     }
 

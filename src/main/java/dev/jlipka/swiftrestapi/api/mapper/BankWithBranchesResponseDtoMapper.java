@@ -29,7 +29,7 @@ public class BankWithBranchesResponseDtoMapper implements BiFunction<Bank, List<
                 bank.getAddress(),
                 bank.getName(),
                 bank.getCountryCode(),
-                bank.getCountryName(),
+                bank.getCountry(),
                 nonNull(bank.getHeadquarter()),
                 bank.getSwiftCode(),
                 branchDtoList);

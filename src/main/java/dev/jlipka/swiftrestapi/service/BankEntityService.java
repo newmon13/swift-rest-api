@@ -1,9 +1,6 @@
 package dev.jlipka.swiftrestapi.service;
 
-import dev.jlipka.swiftrestapi.api.dto.BankFullDetailsDto;
-import dev.jlipka.swiftrestapi.api.dto.BankWithBranchesResponseDto;
-import dev.jlipka.swiftrestapi.api.dto.CountryWithBanksResponseDto;
-import dev.jlipka.swiftrestapi.api.dto.CrudOperationResponseDto;
+import dev.jlipka.swiftrestapi.api.dto.*;
 import dev.jlipka.swiftrestapi.api.mapper.BankMapper;
 import dev.jlipka.swiftrestapi.api.mapper.BankWithBranchesResponseDtoMapper;
 import dev.jlipka.swiftrestapi.api.mapper.CountryWithBanksResponseDtoMapper;
@@ -15,6 +12,7 @@ import dev.jlipka.swiftrestapi.repository.BankRepository;
 import dev.jlipka.swiftrestapi.api.validator.BankValidator;
 import dev.jlipka.swiftrestapi.api.validator.CountryCodeValidator;
 import dev.jlipka.swiftrestapi.api.validator.SwiftCodeValidator;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.*;
 
@@ -133,7 +131,7 @@ public class BankEntityService implements EntityService<Bank> {
     }
 
     @Override
-    public Bank save(Bank entity) {
+    public Bank save(Bank entity) throws ValidationException {
         if (!bankValidator.supports(entity.getClass())) {
             throw new IllegalArgumentException("No validator found for entity type");
         }
@@ -142,7 +140,12 @@ public class BankEntityService implements EntityService<Bank> {
         bankValidator.validate(entity, errors);
 
         if (errors.hasErrors()) {
-            throw new ValidationException(errors.getAllErrors());
+            List<String> serializableErrors = errors.getAllErrors()
+                    .stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList();
+            FailedImport failedImport = new FailedImport(entity, serializableErrors);
+            throw new ValidationException(failedImport);
         }
 
         return bankRepository.save(entity);

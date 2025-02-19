@@ -17,18 +17,13 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @TypeAlias("bank")
 public class Bank {
     @Id
-    @Field("swift-code")
     private String swiftCode;
-    @Field("country-ISO2-code")
     private String countryCode;
-    @Field("swift-code-type")
     private String codeType;
     private String name;
     private String address;
-    @Field("town")
-    private String town;
-    private String country;
-    @Field("time-zone")
+    private String townName;
+    private String countryName;
     private String timeZone;
     @DBRef(lazy = true)
     @ToString.Exclude

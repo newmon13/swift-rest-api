@@ -34,7 +34,7 @@ public class BankMapper implements RowMapper<Bank> {
                 .swiftCode(dto.swiftCode())
                 .codeType(dto.swiftCode())
                 .address(dto.address())
-                .country(dto.countryName())
+                .countryName(dto.countryName())
                 .build();
     }
 
@@ -47,12 +47,11 @@ public class BankMapper implements RowMapper<Bank> {
                 .codeType(getCellValue(cellValues, BankColumn.CODE_TYPE))
                 .name(getCellValue(cellValues, BankColumn.NAME))
                 .address(getCellValue(cellValues, BankColumn.ADDRESS))
-                .town(getCellValue(cellValues, BankColumn.TOWN_NAME))
-                .country(getCellValue(cellValues, BankColumn.COUNTRY_NAME))
+                .townName(getCellValue(cellValues, BankColumn.TOWN_NAME))
+                .countryName(getCellValue(cellValues, BankColumn.COUNTRY_NAME))
                 .timeZone(getCellValue(cellValues, BankColumn.TIME_ZONE))
                 .build();
         }
-
 
     private Map<Integer, String> extractCellValues(Iterator<Cell> rowCells) {
         Map<Integer, String> cellValues = new HashMap<>();

@@ -18,11 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.*;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyList;
 import static java.util.Locale.of;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Service
 public class BankEntityService implements EntityService<Bank> {
@@ -48,7 +47,7 @@ public class BankEntityService implements EntityService<Bank> {
     }
 
     public CountryWithBanksResponseDto findByCountryCode(String countryCode) {
-        validate(countryCode, "countryCode", countryCodeValidator);
+        validate(countryCode, "countryName", countryCodeValidator);
 
         List<Bank> foundBanks = bankRepository.findByCountryCode(countryCode);
         String countryName = getCountryName(countryCode);
@@ -100,12 +99,6 @@ public class BankEntityService implements EntityService<Bank> {
         return new CrudOperationResponseDto("Bank created successfully");
     }
 
-    private void setBranchesHeadquarter(Bank headquarter) {
-        String headquarterPrefix = getHeadquarterPrefix(headquarter.getSwiftCode());
-        List<Bank> allBySwiftCodeStartingWith = bankRepository.getAllBySwiftCodeStartingWith(headquarterPrefix);
-        allBySwiftCodeStartingWith.forEach(bank -> bank.setHeadquarter(headquarter));
-    }
-
     private BankType getBankType(String swiftCode) {
         if (swiftCode.endsWith("XXX")) {
             return BankType.HEADQUARTER;
@@ -120,25 +113,26 @@ public class BankEntityService implements EntityService<Bank> {
         }
     }
 
-    private Optional<Bank> getHeadquarter(String swiftCode) {
-        String headquarterSwiftCode = getHeadquarterPrefix(swiftCode) + "XXX";
-        return bankRepository.findBySwiftCode(headquarterSwiftCode);
-    }
-
     private String getHeadquarterPrefix(String swiftCode) {
         return swiftCode.substring(0, DEFAULT_SWIFT_CODE_LENGTH);
-    }
-
-    private Bank assignHeadquarterToBranch(Optional<Bank> headquarter, Bank branch) {
-        headquarter.ifPresent(branch::setHeadquarter);
-        return branch;
     }
 
     public CrudOperationResponseDto unregister(String swiftCode) {
         Optional<Bank> bank = bankRepository.findBySwiftCode(swiftCode);
 
         if (bank.isPresent()) {
-            bankRepository.deleteBySwiftCode(swiftCode);
+            Bank foundBank = bank.get();
+            BankType bankType = getBankType(foundBank.getSwiftCode());
+            if (bankType == BankType.HEADQUARTER) {
+                List<Bank> headquarterBranches = getHeadquarterBranches(foundBank);
+                setBranchesHeadquarter(headquarterBranches, null);
+
+                if (!headquarterBranches.isEmpty()) {
+                    bankRepository.saveAll(headquarterBranches);
+                }
+
+            }
+            bankRepository.delete(foundBank);
         } else {
             throw new BankNotFoundException("No bank with given swift code found");
         }
@@ -146,36 +140,62 @@ public class BankEntityService implements EntityService<Bank> {
     }
 
     @Override
-    public Bank save(Bank entity) throws ValidationException {
-        if (!bankValidator.supports(entity.getClass())) {
+    public Bank save(Bank bank) throws ValidationException {
+        if (!bankValidator.supports(bank.getClass())) {
             throw new IllegalArgumentException("No validator found for entity type");
         }
 
-        Errors errors = new BeanPropertyBindingResult(entity, "bank");
-        bankValidator.validate(entity, errors);
+        Errors errors = new BeanPropertyBindingResult(bank, "bank");
+        bankValidator.validate(bank, errors);
 
         if (errors.hasErrors()) {
             List<String> serializableErrors = errors.getAllErrors()
                     .stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .toList();
-            FailedImport failedImport = new FailedImport(entity, serializableErrors);
+            FailedImport failedImport = new FailedImport(bank, serializableErrors);
             throw new ValidationException(failedImport);
         }
 
-
-        BankType bankType = getBankType(entity.getSwiftCode());
+        BankType bankType = getBankType(bank.getSwiftCode());
 
         //TODO potential need for fix
 
         if (bankType == BankType.HEADQUARTER) {
-            setBranchesHeadquarter(entity);
-            return bankRepository.save(entity);
+            Bank savedHeadquarter = bankRepository.save(bank);
+            List<Bank> headquarterBranches = getHeadquarterBranches(savedHeadquarter);
+            setBranchesHeadquarter(headquarterBranches, bank);
+
+            if (!headquarterBranches.isEmpty()) {
+                bankRepository.saveAll(headquarterBranches);
+            }
+            return savedHeadquarter;
+
         } else {
-            Optional<Bank> headquarter = getHeadquarter(entity.getSwiftCode());
-            Bank bankToSave = assignHeadquarterToBranch(headquarter, entity);
+            Optional<Bank> headquarter = getHeadquarter(bank.getSwiftCode());
+            Bank bankToSave = assignHeadquarterToBranch(headquarter, bank);
             return bankRepository.save(bankToSave);
         }
+    }
+
+    private List<Bank> getHeadquarterBranches(Bank headquarter) {
+        String headquarterPrefix = getHeadquarterPrefix(headquarter.getSwiftCode());
+        Pattern branchPattern = Pattern.compile("^" + headquarterPrefix + "(?!XXX)");
+        return bankRepository.getAllBySwiftCodeMatchesRegex(branchPattern.pattern());
+    }
+
+    private void setBranchesHeadquarter(List<Bank> branches, Bank headquarter) {
+        branches.forEach(bank -> bank.setHeadquarter(headquarter));
+    }
+
+    private Optional<Bank> getHeadquarter(String swiftCode) {
+        String headquarterSwiftCode = getHeadquarterPrefix(swiftCode) + "XXX";
+        return bankRepository.findBySwiftCode(headquarterSwiftCode);
+    }
+
+    private Bank assignHeadquarterToBranch(Optional<Bank> headquarter, Bank branch) {
+        headquarter.ifPresent(branch::setHeadquarter);
+        return branch;
     }
 
     @Override

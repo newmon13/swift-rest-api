@@ -16,7 +16,7 @@ public class BankFullResponseDtoMapper implements Function <Bank, BankFullDetail
                 bank.getAddress(),
                 bank.getName(),
                 bank.getCountryCode(),
-                bank.getCountry(),
+                bank.getCountryName(),
                 nonNull(bank.getHeadquarter()),
                 bank.getSwiftCode());
     }

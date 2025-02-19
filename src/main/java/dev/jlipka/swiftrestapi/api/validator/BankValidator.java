@@ -1,6 +1,7 @@
 package dev.jlipka.swiftrestapi.api.validator;
 
 import dev.jlipka.swiftrestapi.domain.model.Bank;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -23,15 +24,15 @@ public class BankValidator implements Validator {
     }
 
     @Override
-    public boolean supports(Class<?> clazz) {
+    public boolean supports(@NonNull Class<?> clazz) {
         return Bank.class.equals(clazz);
     }
 
     @Override
-    public void validate(Object target, Errors errors) {
+    public void validate(@NonNull Object target, @NonNull Errors errors) {
         Bank bank = (Bank) target;
 
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "countryCode", "country.code.empty");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "countryName", "country.name.empty");
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "swiftCode", "swift.code.empty");
 
         if (errors.hasErrors()) {

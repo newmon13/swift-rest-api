@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 @Component
 public class BankWithBranchesResponseDtoMapper implements BiFunction<Bank, List<Bank>, BankWithBranchesResponseDto> {
@@ -29,8 +29,8 @@ public class BankWithBranchesResponseDtoMapper implements BiFunction<Bank, List<
                 bank.getAddress(),
                 bank.getName(),
                 bank.getCountryCode(),
-                bank.getCountry(),
-                nonNull(bank.getHeadquarter()),
+                bank.getCountryName(),
+                isNull(bank.getHeadquarter()),
                 bank.getSwiftCode(),
                 branchDtoList);
     }

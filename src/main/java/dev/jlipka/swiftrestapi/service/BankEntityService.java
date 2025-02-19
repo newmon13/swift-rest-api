@@ -4,6 +4,7 @@ import dev.jlipka.swiftrestapi.api.dto.*;
 import dev.jlipka.swiftrestapi.api.mapper.BankMapper;
 import dev.jlipka.swiftrestapi.api.mapper.BankWithBranchesResponseDtoMapper;
 import dev.jlipka.swiftrestapi.api.mapper.CountryWithBanksResponseDtoMapper;
+import dev.jlipka.swiftrestapi.domain.model.BankType;
 import dev.jlipka.swiftrestapi.infrastructure.error.BankNotFoundException;
 import dev.jlipka.swiftrestapi.infrastructure.error.DuplicateResourceException;
 import dev.jlipka.swiftrestapi.infrastructure.error.ValidationException;
@@ -21,12 +22,11 @@ import java.util.*;
 import static java.util.Collections.emptyList;
 import static java.util.Locale.of;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 public class BankEntityService implements EntityService<Bank> {
-    private static final int EXTENDED_SWIFT_CODE_LENGTH = 11;
     private static final int DEFAULT_SWIFT_CODE_LENGTH = 8;
-
     private final BankRepository bankRepository;
     private final BankValidator bankValidator;
     private final BankMapper bankMapper;
@@ -84,7 +84,8 @@ public class BankEntityService implements EntityService<Bank> {
     }
 
     private List<Bank> getBankBranches(Bank bank) {
-        if (isNull(bank.getHeadquarter())) {
+        BankType bankType = getBankType(bank.getSwiftCode());
+        if (bankType == BankType.HEADQUARTER) {
             return bankRepository.getAllByHeadquarter(bank);
         } else {
             return emptyList();
@@ -95,11 +96,22 @@ public class BankEntityService implements EntityService<Bank> {
         Bank mappedBank = bankMapper.from(bankFullDetailsDto);
         Bank validatedBank = validate(mappedBank, "bank", bankValidator);
         checkForDuplicateResource(validatedBank);
-
-        Optional<Bank> headquarter = getHeadquarter(validatedBank.getSwiftCode());
-        Bank bankToSave = assignHeadquarterToBranch(headquarter, validatedBank);
-        bankRepository.save(bankToSave);
+        save(validatedBank);
         return new CrudOperationResponseDto("Bank created successfully");
+    }
+
+    private void setBranchesHeadquarter(Bank headquarter) {
+        String headquarterPrefix = getHeadquarterPrefix(headquarter.getSwiftCode());
+        List<Bank> allBySwiftCodeStartingWith = bankRepository.getAllBySwiftCodeStartingWith(headquarterPrefix);
+        allBySwiftCodeStartingWith.forEach(bank -> bank.setHeadquarter(headquarter));
+    }
+
+    private BankType getBankType(String swiftCode) {
+        if (swiftCode.endsWith("XXX")) {
+            return BankType.HEADQUARTER;
+        } else {
+            return BankType.BRANCH;
+        }
     }
 
     private void checkForDuplicateResource(Bank bank) {
@@ -109,9 +121,12 @@ public class BankEntityService implements EntityService<Bank> {
     }
 
     private Optional<Bank> getHeadquarter(String swiftCode) {
-        String headquarterPrefix = swiftCode.substring(0, DEFAULT_SWIFT_CODE_LENGTH);
-        String headquarterSwiftCode = headquarterPrefix + "XXX";
+        String headquarterSwiftCode = getHeadquarterPrefix(swiftCode) + "XXX";
         return bankRepository.findBySwiftCode(headquarterSwiftCode);
+    }
+
+    private String getHeadquarterPrefix(String swiftCode) {
+        return swiftCode.substring(0, DEFAULT_SWIFT_CODE_LENGTH);
     }
 
     private Bank assignHeadquarterToBranch(Optional<Bank> headquarter, Bank branch) {
@@ -148,7 +163,19 @@ public class BankEntityService implements EntityService<Bank> {
             throw new ValidationException(failedImport);
         }
 
-        return bankRepository.save(entity);
+
+        BankType bankType = getBankType(entity.getSwiftCode());
+
+        //TODO potential need for fix
+
+        if (bankType == BankType.HEADQUARTER) {
+            setBranchesHeadquarter(entity);
+            return bankRepository.save(entity);
+        } else {
+            Optional<Bank> headquarter = getHeadquarter(entity.getSwiftCode());
+            Bank bankToSave = assignHeadquarterToBranch(headquarter, entity);
+            return bankRepository.save(bankToSave);
+        }
     }
 
     @Override

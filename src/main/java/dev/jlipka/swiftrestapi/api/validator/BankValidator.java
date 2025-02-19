@@ -7,6 +7,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import java.util.Locale;
+
 @Component
 public class BankValidator implements Validator {
     private final Validator swiftCodeValidator;
@@ -44,6 +46,7 @@ public class BankValidator implements Validator {
 
         if (!errors.hasErrors()) {
             isSameCountryCodeInSwiftCode(bank, errors);
+            doesCountryCodeMatchCountryName(bank, errors);
         }
     }
 
@@ -54,6 +57,15 @@ public class BankValidator implements Validator {
         if (!bank.getCountryCode().equals(extractedCountryCode)) {
             errors.reject("bank.property.countryISO2.mismatch",
                     "Mismatch between countryISO2 code and corresponding fragment in SWIFT code");
+        }
+    }
+
+    private void doesCountryCodeMatchCountryName(Bank bank, Errors errors) {
+        String expectedCountry = Locale.of("", bank.getCountryCode()).getDisplayCountry();
+
+        if (!expectedCountry.equals(bank.getCountryName())) {
+            errors.reject("bank.property.countryISO2.mismatch",
+                    "Mismatch between countryISO2 code and country name");
         }
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/v1/swift-codes")
 public class BankController {
+
     private final BankEntityService bankEntityService;
 
     public BankController(BankEntityService bankEntityService) {

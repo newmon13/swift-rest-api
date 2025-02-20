@@ -13,6 +13,7 @@ import static java.util.Objects.isNull;
 
 @Component
 public class HeadquarterBankDetailsMapper implements BiFunction<Bank, List<Bank>, HeadquarterBankDetailsDto> {
+
     private final BranchBankDetailsDtoMapper mapper;
 
     public HeadquarterBankDetailsMapper(BranchBankDetailsDtoMapper mapper) {

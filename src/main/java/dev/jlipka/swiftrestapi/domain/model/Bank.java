@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @NoArgsConstructor
 @TypeAlias("bank")
 public class Bank {
+
     @Id
     private String swiftCode;
     private String countryCode;

@@ -8,6 +8,7 @@ import java.util.stream.StreamSupport;
 
 
 public class EntityExtractor<T> {
+
     private final RowMapper<T> rowMapper;
 
     public EntityExtractor(RowMapper<T> rowMapper) {

@@ -8,6 +8,7 @@ import static org.springframework.validation.ValidationUtils.invokeValidator;
 
 @Component
 public class SwiftCodeValidator implements Validator {
+
     private final Validator countryCodeValidator;
 
     public SwiftCodeValidator(Validator countryCodeValidator) {

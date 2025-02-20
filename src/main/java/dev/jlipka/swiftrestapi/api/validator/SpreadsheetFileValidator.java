@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 @Component
 public class SpreadsheetFileValidator implements Validator {
+
     private static final int maxSizeInMb = 5;
 
     @Override

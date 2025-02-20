@@ -11,6 +11,7 @@ import java.util.*;
 @Slf4j
 @Component
 public class BankMapper implements RowMapper<Bank> {
+
     private enum BankColumn {
         COUNTRY_CODE(0),
         SWIFT_CODE(1),

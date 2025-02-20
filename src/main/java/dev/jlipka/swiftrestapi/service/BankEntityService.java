@@ -26,6 +26,7 @@ import static java.util.Locale.of;
 
 @Service
 public class BankEntityService implements EntityService<Bank> {
+
     private static final int DEFAULT_SWIFT_CODE_LENGTH = 8;
     private final BankRepository bankRepository;
     private final BankValidator bankValidator;

@@ -11,6 +11,7 @@ import java.util.Locale;
 
 @Component
 public class BankValidator implements Validator {
+
     private final Validator swiftCodeValidator;
     private final Validator countryCodeValidator;
 

@@ -12,6 +12,7 @@ import static java.util.Locale.getISOCountries;
 
 @Component
 public class CountryCodeValidator implements Validator {
+
     private static final List<String> ISO_COUNTRIES = asList(getISOCountries());
     private static final Pattern COUNTRY_CODE_PATTERN = Pattern.compile("^[A-Z]{2}$");
 

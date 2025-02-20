@@ -15,6 +15,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class ExcelReader {
+
     @Value("${app.storage.location}")
     private String storageLocation;
 

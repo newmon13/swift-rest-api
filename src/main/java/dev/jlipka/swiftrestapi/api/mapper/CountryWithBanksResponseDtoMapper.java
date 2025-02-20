@@ -11,6 +11,7 @@ import java.util.List;
 
 @Component
 public class CountryWithBanksResponseDtoMapper implements TriFunction<String, String, List<Bank>, CountryWithBanksResponseDto> {
+
     private final BranchBankDetailsDtoMapper mapper;
 
     public CountryWithBanksResponseDtoMapper(BranchBankDetailsDtoMapper mapper) {

@@ -3,6 +3,7 @@ package dev.jlipka.swiftrestapi.api.controller;
 
 import dev.jlipka.swiftrestapi.api.dto.*;
 import dev.jlipka.swiftrestapi.service.BankEntityService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,7 @@ public class BankController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CrudOperationResponseDto registerBank(@RequestBody BankFullDetailsDto bankFullDetailsDto) {
+    public CrudOperationResponseDto registerBank(@Valid  @RequestBody BankFullDetailsDto bankFullDetailsDto) {
         return bankEntityService.registerBank(bankFullDetailsDto);
     }
 

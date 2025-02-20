@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.api.mapper;
 
-import dev.jlipka.swiftrestapi.api.dto.BankFullDetailsDto;
+import dev.jlipka.swiftrestapi.api.dto.BranchBankFullDetailsDto;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -28,7 +28,7 @@ public class BankMapper implements RowMapper<Bank> {
         }
     }
 
-    public Bank from(BankFullDetailsDto dto) {
+    public Bank from(BranchBankFullDetailsDto dto) {
         return Bank.builder()
                 .countryCode(dto.countryISO2())
                 .swiftCode(dto.swiftCode())

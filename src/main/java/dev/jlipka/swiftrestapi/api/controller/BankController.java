@@ -1,10 +1,7 @@
 package dev.jlipka.swiftrestapi.api.controller;
 
 
-import dev.jlipka.swiftrestapi.api.dto.BankFullDetailsDto;
-import dev.jlipka.swiftrestapi.api.dto.BankWithBranchesResponseDto;
-import dev.jlipka.swiftrestapi.api.dto.CountryWithBanksResponseDto;
-import dev.jlipka.swiftrestapi.api.dto.CrudOperationResponseDto;
+import dev.jlipka.swiftrestapi.api.dto.*;
 import dev.jlipka.swiftrestapi.service.BankEntityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +16,7 @@ public class BankController {
     }
 
     @GetMapping("/{swift-code}")
-    public BankWithBranchesResponseDto getBank(@PathVariable("swift-code") String swiftCode) {
+    public BankResponseDto getBank(@PathVariable("swift-code") String swiftCode) {
         return bankEntityService.findBySwiftCode(swiftCode);
     }
 
@@ -30,8 +27,8 @@ public class BankController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CrudOperationResponseDto registerBank(@RequestBody BankFullDetailsDto bankFullDetailsDto) {
-        return bankEntityService.registerBank(bankFullDetailsDto);
+    public CrudOperationResponseDto registerBank(@RequestBody BranchBankFullDetailsDto branchBankFullDetailsDto) {
+        return bankEntityService.registerBank(branchBankFullDetailsDto);
     }
 
     @DeleteMapping("/{swift-code}")

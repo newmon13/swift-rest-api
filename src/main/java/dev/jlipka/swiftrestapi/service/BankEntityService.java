@@ -2,7 +2,8 @@ package dev.jlipka.swiftrestapi.service;
 
 import dev.jlipka.swiftrestapi.api.dto.*;
 import dev.jlipka.swiftrestapi.api.mapper.BankMapper;
-import dev.jlipka.swiftrestapi.api.mapper.BankWithBranchesResponseDtoMapper;
+import dev.jlipka.swiftrestapi.api.mapper.BranchBankFullDetailsDtoMapper;
+import dev.jlipka.swiftrestapi.api.mapper.HeadquarterBankDetailsMapper;
 import dev.jlipka.swiftrestapi.api.mapper.CountryWithBanksResponseDtoMapper;
 import dev.jlipka.swiftrestapi.domain.model.BankType;
 import dev.jlipka.swiftrestapi.infrastructure.error.BankNotFoundException;
@@ -29,18 +30,25 @@ public class BankEntityService implements EntityService<Bank> {
     private final BankRepository bankRepository;
     private final BankValidator bankValidator;
     private final BankMapper bankMapper;
-    private final BankWithBranchesResponseDtoMapper bankWithBranchesMapper;
+    private final HeadquarterBankDetailsMapper headquarterBankDetailsMapper;
+    private final BranchBankFullDetailsDtoMapper branchBankFullDetailsDtoMapper;
     private final CountryWithBanksResponseDtoMapper countryWithBanksMapper;
     private final CountryCodeValidator countryCodeValidator;
     private final SwiftCodeValidator swiftCodeValidator;
 
-    public BankEntityService(BankRepository bankRepository, BankValidator bankValidator, BankMapper bankMapper,
-                             BankWithBranchesResponseDtoMapper bankWithBranchesMapper,
-                             CountryWithBanksResponseDtoMapper countryWithBanksMapper, CountryCodeValidator countryCodeValidator, SwiftCodeValidator swiftCodeValidator) {
+    public BankEntityService(BankRepository bankRepository,
+                             BankValidator bankValidator,
+                             BankMapper bankMapper,
+                             HeadquarterBankDetailsMapper headquarterBankDetailsMapper,
+                             BranchBankFullDetailsDtoMapper branchBankFullDetailsDtoMapper,
+                             CountryWithBanksResponseDtoMapper countryWithBanksMapper,
+                             CountryCodeValidator countryCodeValidator,
+                             SwiftCodeValidator swiftCodeValidator) {
         this.bankRepository = bankRepository;
         this.bankValidator = bankValidator;
         this.bankMapper = bankMapper;
-        this.bankWithBranchesMapper = bankWithBranchesMapper;
+        this.headquarterBankDetailsMapper = headquarterBankDetailsMapper;
+        this.branchBankFullDetailsDtoMapper = branchBankFullDetailsDtoMapper;
         this.countryWithBanksMapper = countryWithBanksMapper;
         this.countryCodeValidator = countryCodeValidator;
         this.swiftCodeValidator = swiftCodeValidator;
@@ -59,12 +67,19 @@ public class BankEntityService implements EntityService<Bank> {
         return locale.getDisplayCountry();
     }
 
-    public BankWithBranchesResponseDto findBySwiftCode(String swiftCode) {
+    public BankResponseDto findBySwiftCode(String swiftCode) {
         validate(swiftCode, "swiftCode", swiftCodeValidator);
 
         Bank foundBank = bankRepository.findBySwiftCode(swiftCode)
                 .orElseThrow(() -> new BankNotFoundException("Bank not found for SWIFT code: " + swiftCode));
-        return bankWithBranchesMapper.apply(foundBank, getBankBranches(foundBank));
+
+        BankType bankType = getBankType(foundBank.getSwiftCode());
+
+        if (bankType == BankType.HEADQUARTER) {
+            return headquarterBankDetailsMapper.apply(foundBank, getBankBranches(foundBank));
+        } else {
+            return branchBankFullDetailsDtoMapper.apply(foundBank);
+        }
     }
 
     private <T> T validate(T object, String objectName, Validator validator) {
@@ -91,8 +106,8 @@ public class BankEntityService implements EntityService<Bank> {
         }
     }
 
-    public CrudOperationResponseDto registerBank(BankFullDetailsDto bankFullDetailsDto) {
-        Bank mappedBank = bankMapper.from(bankFullDetailsDto);
+    public CrudOperationResponseDto registerBank(BranchBankFullDetailsDto branchBankFullDetailsDto) {
+        Bank mappedBank = bankMapper.from(branchBankFullDetailsDto);
         Bank validatedBank = validate(mappedBank, "bank", bankValidator);
         checkForDuplicateResource(validatedBank);
         save(validatedBank);

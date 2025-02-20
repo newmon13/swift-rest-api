@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record BranchBankFullDetailsDto(
+public record BankFullDetailsDto(
         @Max(value = 100, message = "Address cannot be longer than 100 characters")
         String address,
         @Max(value = 100, message = "Bank name cannot be longer than 100 characters")

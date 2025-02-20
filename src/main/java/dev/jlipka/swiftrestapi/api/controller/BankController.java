@@ -28,8 +28,8 @@ public class BankController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CrudOperationResponseDto registerBank(@RequestBody BranchBankFullDetailsDto branchBankFullDetailsDto) {
-        return bankEntityService.registerBank(branchBankFullDetailsDto);
+    public CrudOperationResponseDto registerBank(@RequestBody BankFullDetailsDto bankFullDetailsDto) {
+        return bankEntityService.registerBank(bankFullDetailsDto);
     }
 
     @DeleteMapping("/{swift-code}")

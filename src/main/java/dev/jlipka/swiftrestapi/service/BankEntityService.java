@@ -107,8 +107,8 @@ public class BankEntityService implements EntityService<Bank> {
         }
     }
 
-    public CrudOperationResponseDto registerBank(BranchBankFullDetailsDto branchBankFullDetailsDto) {
-        Bank mappedBank = bankMapper.from(branchBankFullDetailsDto);
+    public CrudOperationResponseDto registerBank(BankFullDetailsDto bankFullDetailsDto) {
+        Bank mappedBank = bankMapper.from(bankFullDetailsDto);
         Bank validatedBank = validate(mappedBank, "bank", bankValidator);
         checkForDuplicateResource(validatedBank);
         save(validatedBank);

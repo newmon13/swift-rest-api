@@ -21,13 +21,13 @@ This service provides functionality to process and manage SWIFT/BIC codes data. 
 ## Features
 
 Core functionality:
-- [ ] SWIFT/BIC code data extraction from spreadsheets
-- [ ] Automatic detection of headquarters (XXX-ending codes) and branch relationships
-- [ ] Data persistence with MongoDB
-- [ ] RESTful API for data access and management
+- [x ] SWIFT/BIC code data extraction from spreadsheets
+- [x ] Automatic detection of headquarters (XXX-ending codes) and branch relationships
+- [x ] Data persistence with MongoDB
+- [x ] RESTful API for data access and management
 
 Nice to have:
-- [ ] Edge cases validation
+- [x ] Edge cases validation
 - [ ] Comprehensive test coverage (unit & integration)
 - [ ] Containerized deployment
 

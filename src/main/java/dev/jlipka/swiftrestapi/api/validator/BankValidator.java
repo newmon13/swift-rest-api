@@ -55,16 +55,17 @@ public class BankValidator implements Validator {
         String extractedCountryCode = bank.getSwiftCode()
                 .substring(4, 6);
 
-        if (!bank.getCountryCode().equals(extractedCountryCode)) {
+        if (!bank.getCountryCode()
+                .equalsIgnoreCase(extractedCountryCode)) {
             errors.reject("bank.property.countryISO2.mismatch",
                     "Mismatch between countryISO2 code and corresponding fragment in SWIFT code");
         }
     }
 
     private void doesCountryCodeMatchCountryName(Bank bank, Errors errors) {
-        String expectedCountry = Locale.of("", bank.getCountryCode()).getDisplayCountry();
-
-        if (!expectedCountry.equals(bank.getCountryName())) {
+        String expectedCountry = Locale.of("", bank.getCountryCode()).getDisplayCountry(Locale.ENGLISH).toUpperCase();
+        String actualCountry = bank.getCountryName().toUpperCase().trim();
+        if (!expectedCountry.equals(actualCountry)) {
             errors.reject("bank.property.countryISO2.mismatch",
                     "Mismatch between countryISO2 code and country name");
         }

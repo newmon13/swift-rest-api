@@ -30,41 +30,42 @@ public class SwiftCodeValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         String swiftCode = (String) target;
+        isLengthCorrect(swiftCode, errors);
+        if (errors.hasErrors()) return;
+
         String bankCode = swiftCode.substring(0,4);
         String countryCode = swiftCode.substring(4,6);
         String locationCode = swiftCode.substring(6,8);
         String branchCode = swiftCode.substring(8);
 
-        isLengthCorrect(swiftCode, errors);
         isBankCodeValid(bankCode, errors);
         invokeValidator(countryCodeValidator, countryCode, errors);
-
         isLocationCodeValid(locationCode, errors);
         isBranchCodeValid(branchCode, errors);
     }
 
     private void isLengthCorrect(String swiftCode, Errors errors) {
         if (swiftCode.length() != 11) {
-            errors.reject("swift-code.length.invalid", "SWIFT code must be 11 characters long");
+            errors.reject("swiftCode.length.invalid", "SWIFT code must be 11 characters long");
         }
     }
 
     private void isBankCodeValid(String bankCode, Errors errors) {
         if (!bankCode.matches("^[A-Z]{4}$")) {
-            errors.reject("swift-code.bank-code.invalid", "Bank code must contain 4 letters");
+            errors.reject("swiftCode.bank.code.invalid", "Bank code must contain 4 letters");
         }
     }
 
     private void isLocationCodeValid(String locationCode, Errors errors) {
         if (!locationCode.matches("^[A-Z0-9]{2}$")) {
-            errors.reject("swift-code.location-code.invalid",
+            errors.reject("swiftCode.location.code.invalid",
                     "Location code must contain 2 alphanumeric characters");
         }
     }
 
     private void isBranchCodeValid(String branchCode, Errors errors) {
-        if (!branchCode.matches("^(XXX|[A-Z0-9]{3})$")) {
-            errors.reject("swift-code.branch-code.invalid",
+        if (!branchCode.matches("^[A-Z0-9]{3}$")) {
+            errors.reject("swiftCode.branch.code.invalid",
                     "Branch code must be 'XXX' for head office or 3 alphanumeric characters");
         }
     }

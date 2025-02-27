@@ -36,7 +36,7 @@ class CountryCodeValidatorTest {
     }
 
     @Test
-    void shouldContainCountryCodeFormatErrorWhenCountryCodeIsNotValid() {
+    void shouldContainCountryCodeFormatErrorWhenCountryCodeIsNotTwoCharactersLong() {
         //given
         String countryCode = "failingCountryCode";
         Errors errors = new BeanPropertyBindingResult(countryCode, "countryCode");
@@ -52,7 +52,7 @@ class CountryCodeValidatorTest {
     }
 
     @Test
-    void shouldNotContainCountryCodeFormatErrorWhenCountryCodeIsNotValid() {
+    void shouldNotContainCountryCodeFormatErrorWhenCountryCodeIsTwoCharactersLong() {
         //given
         String countryCode = "PL";
         Errors errors = new BeanPropertyBindingResult(countryCode, "countryCode");
@@ -65,5 +65,21 @@ class CountryCodeValidatorTest {
                 .flatMap(error -> Arrays.stream(Objects.requireNonNull(error.getCodes())))
                 .anyMatch(code -> code.equals("country.code.format"));
         assertThat(foundCode).isFalse();
+    }
+
+    @Test
+    void shouldContainCountryCodeNotFoundErrorWhenCountryISO2CodeIsNotValidOrNotKnown() {
+        //given
+        String countryCode = "QQ";
+        Errors errors = new BeanPropertyBindingResult(countryCode, "countryCode");
+        //when
+        validator.validate(countryCode, errors);
+        //then
+        assertThat(errors.getAllErrors()).hasSize(1);
+        boolean foundCode = errors.getAllErrors()
+                .stream()
+                .flatMap(error -> Arrays.stream(Objects.requireNonNull(error.getCodes())))
+                .anyMatch(code -> code.equals("country.code.not.found"));
+        assertThat(foundCode).isTrue();
     }
 }

@@ -9,6 +9,8 @@ import org.springframework.validation.Validator;
 
 import java.util.Locale;
 
+import static org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace;
+
 @Component
 public class BankValidator implements Validator {
 
@@ -35,8 +37,8 @@ public class BankValidator implements Validator {
     public void validate(@NonNull Object target, @NonNull Errors errors) {
         Bank bank = (Bank) target;
 
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "countryName", "country.name.empty");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "swiftCode", "swift.code.empty");
+        rejectIfEmptyOrWhitespace(errors, "countryName", "country.name.empty");
+        rejectIfEmptyOrWhitespace(errors, "swiftCode", "swift.code.empty");
 
         if (errors.hasErrors()) {
             return;
@@ -54,9 +56,8 @@ public class BankValidator implements Validator {
     private void isSameCountryCodeInSwiftCode(Bank bank, Errors errors) {
         String extractedCountryCode = bank.getSwiftCode()
                 .substring(4, 6);
-
         if (!bank.getCountryCode()
-                .equalsIgnoreCase(extractedCountryCode)) {
+                .equals(extractedCountryCode)) {
             errors.reject("bank.property.countryISO2.mismatch",
                     "Mismatch between countryISO2 code and corresponding fragment in SWIFT code");
         }
@@ -66,7 +67,7 @@ public class BankValidator implements Validator {
         String expectedCountry = Locale.of("", bank.getCountryCode()).getDisplayCountry(Locale.ENGLISH).toUpperCase();
         String actualCountry = bank.getCountryName().toUpperCase().trim();
         if (!expectedCountry.equals(actualCountry)) {
-            errors.reject("bank.property.countryISO2.mismatch",
+            errors.reject("bank.property.countryName.mismatch",
                     "Mismatch between countryISO2 code and country name");
         }
     }

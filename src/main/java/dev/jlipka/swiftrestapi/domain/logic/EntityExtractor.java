@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.domain.logic;
 
-import dev.jlipka.swiftrestapi.api.mapper.RowMapper;
+import dev.jlipka.swiftrestapi.api.mapper.entity.RowMapper;
 import org.apache.poi.ss.usermodel.*;
 
 import java.util.*;

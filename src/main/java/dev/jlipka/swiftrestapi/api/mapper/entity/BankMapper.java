@@ -1,43 +1,17 @@
-package dev.jlipka.swiftrestapi.api.mapper;
+package dev.jlipka.swiftrestapi.api.mapper.entity;
 
-import dev.jlipka.swiftrestapi.api.dto.BankFullDetailsDto;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 @Slf4j
 @Component
 public class BankMapper implements RowMapper<Bank> {
-
-    private enum BankColumn {
-        COUNTRY_CODE(0),
-        SWIFT_CODE(1),
-        CODE_TYPE(2),
-        NAME(3),
-        ADDRESS(4),
-        TOWN_NAME(5),
-        COUNTRY_NAME(6),
-        TIME_ZONE(7);
-
-        private final int index;
-
-        BankColumn(int index) {
-            this.index = index;
-        }
-    }
-
-    public Bank from(BankFullDetailsDto dto) {
-        return Bank.builder()
-                .countryCode(dto.countryISO2())
-                .swiftCode(dto.swiftCode())
-                .codeType(dto.swiftCode())
-                .address(dto.address())
-                .countryName(dto.countryName())
-                .build();
-    }
 
     @Override
     public Bank from(Iterator<Cell> rowCells) {
@@ -52,7 +26,7 @@ public class BankMapper implements RowMapper<Bank> {
                 .countryName(getCellValue(cellValues, BankColumn.COUNTRY_NAME))
                 .timeZone(getCellValue(cellValues, BankColumn.TIME_ZONE))
                 .build();
-        }
+    }
 
     private Map<Integer, String> extractCellValues(Iterator<Cell> rowCells) {
         Map<Integer, String> cellValues = new HashMap<>();
@@ -71,6 +45,16 @@ public class BankMapper implements RowMapper<Bank> {
             return null;
         } else {
             return value.strip();
+        }
+    }
+
+    private enum BankColumn {
+        COUNTRY_CODE(0), SWIFT_CODE(1), CODE_TYPE(2), NAME(3), ADDRESS(4), TOWN_NAME(5), COUNTRY_NAME(6), TIME_ZONE(7);
+
+        private final int index;
+
+        BankColumn(int index) {
+            this.index = index;
         }
     }
 }

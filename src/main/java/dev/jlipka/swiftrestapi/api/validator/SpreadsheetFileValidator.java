@@ -38,7 +38,7 @@ public class SpreadsheetFileValidator implements Validator {
         }
     }
     private void isFileTooBig(MultipartFile file, Errors errors) {
-        if (convertBytesToMegaBytes(file.getSize()) >= maxSizeInMb) {
+        if (convertBytesToMegaBytes(file.getSize()) > maxSizeInMb) {
             errors.reject("file.too.large",
                     String.format("File is too large (Max: %d MB)", maxSizeInMb));
         }

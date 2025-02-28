@@ -1,6 +1,5 @@
 package dev.jlipka.swiftrestapi.api.validator;
 
-import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -10,7 +9,6 @@ import java.util.regex.Pattern;
 import static java.util.Arrays.asList;
 import static java.util.Locale.getISOCountries;
 
-@Component
 public class CountryCodeValidator implements Validator {
 
     private static final List<String> ISO_COUNTRIES = asList(getISOCountries());

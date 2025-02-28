@@ -1,6 +1,6 @@
 package dev.jlipka.swiftrestapi.domain.logic;
 
-import dev.jlipka.swiftrestapi.api.mapper.BankMapper;
+import dev.jlipka.swiftrestapi.api.mapper.entity.BankMapper;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;

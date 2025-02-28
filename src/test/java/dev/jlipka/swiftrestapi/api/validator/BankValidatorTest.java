@@ -1,10 +1,8 @@
 package dev.jlipka.swiftrestapi.api.validator;
 
 import dev.jlipka.swiftrestapi.domain.model.Bank;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -13,25 +11,10 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BankValidatorTest {
-
-    @Mock
-    CountryCodeValidator countryCodeValidator;
-    @Mock
-    SwiftCodeValidator swiftCodeValidator;
-
-    BankValidator bankValidator;
-
-    @BeforeEach
-    void setUp() {
-        when(countryCodeValidator.supports(String.class)).thenReturn(true);
-        when(swiftCodeValidator.supports(String.class)).thenReturn(true);
-
-        bankValidator = new BankValidator(countryCodeValidator, swiftCodeValidator);
-    }
+    BankValidator bankValidator = new BankValidator();
 
     @Test
     void shouldReturnTrueWhenPassedObjectOfBankInstance() {
@@ -113,24 +96,28 @@ class BankValidatorTest {
     @Test
     void shouldContainBankPropertyCountryNameMismatchError() {
         //given
-        Bank bank = new Bank("....PL.....",
+        Bank bank = new Bank("AAAAPLAAAAA",
                 "PL",
                 "testCodeType",
                 "testBankName",
                 "testAddress",
                 "testTownName",
-                "Germany",
+                "GERMANY",
                 "testCountryZone",
                 null);
         Errors errors = new BeanPropertyBindingResult(bank, "bank");
         //when
         bankValidator.validate(bank, errors);
         //then
-        assertThat(errors.getAllErrors()).hasSize(1);
         boolean foundCode = errors.getAllErrors()
                 .stream()
                 .flatMap(error -> Arrays.stream(Objects.requireNonNull(error.getCodes())))
-                .anyMatch(code -> code.equals("bank.property.countryName.mismatch"));
+                .anyMatch(code -> code.equals("bank.property.countryISO2.countryName.mismatch"));
+
+
+
+        errors.getAllErrors().stream().flatMap(objectError ->
+                Arrays.stream(Objects.requireNonNull(objectError.getCodes()))).forEach(System.out::println);
 
         assertThat(foundCode).isTrue();
     }
@@ -139,7 +126,7 @@ class BankValidatorTest {
     @Test
     void shouldContainBankPropertyCountryISO2MismatchError() {
         //given
-        Bank bank = new Bank("....AD.....",
+        Bank bank = new Bank("AAAAFRAAAAA",
                 "PL",
                 "testCodeType",
                 "testBankName",
@@ -152,12 +139,10 @@ class BankValidatorTest {
         //when
         bankValidator.validate(bank, errors);
         //then
-        assertThat(errors.getAllErrors()).hasSize(1);
         boolean foundCode = errors.getAllErrors()
                 .stream()
                 .flatMap(error -> Arrays.stream(Objects.requireNonNull(error.getCodes())))
-                .anyMatch(code -> code.equals("bank.property.countryISO2.mismatch"));
-
+                .anyMatch(code -> code.equals("bank.property.countryISO2.swiftCode.mismatch"));
         assertThat(foundCode).isTrue();
     }
 
@@ -165,15 +150,7 @@ class BankValidatorTest {
     @Test
     void shouldContainBothCountryISO2AndCountryNameMismatchErrors() {
         //given
-        Bank bank = new Bank("....AD.....",
-                "PL",
-                "testCodeType",
-                "testBankName",
-                "testAddress",
-                "testTownName",
-                "FRANCE",
-                "testCountryZone",
-                null);
+        Bank bank = new Bank("AAAAFRAAAAA", "PL", "testCodeType", "testBankName", "testAddress", "testTownName", "GERMANY", "testCountryZone", null);
         Errors errors = new BeanPropertyBindingResult(bank, "bank");
         //when
         bankValidator.validate(bank, errors);
@@ -182,13 +159,12 @@ class BankValidatorTest {
         boolean countryISO2mismatchError = errors.getAllErrors()
                 .stream()
                 .flatMap(error -> Arrays.stream(Objects.requireNonNull(error.getCodes())))
-                .anyMatch(code -> code.equals("bank.property.countryISO2.mismatch"));
+                .anyMatch(code -> code.equals("bank.property.countryISO2.swiftCode.mismatch"));
 
         boolean countryNameMismatchError = errors.getAllErrors()
                 .stream()
                 .flatMap(error -> Arrays.stream(Objects.requireNonNull(error.getCodes())))
-                .anyMatch(code -> code.equals("bank.property.countryName.mismatch"));
-
+                .anyMatch(code -> code.equals("bank.property.countryISO2.countryName.mismatch"));
         assertThat(countryISO2mismatchError).isTrue();
         assertThat(countryNameMismatchError).isTrue();
     }

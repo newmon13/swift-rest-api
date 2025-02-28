@@ -1,24 +1,15 @@
 package dev.jlipka.swiftrestapi.api.validator;
 
-import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import static org.springframework.validation.ValidationUtils.invokeValidator;
 
-@Component
 public class SwiftCodeValidator implements Validator {
 
     private final Validator countryCodeValidator;
 
     public SwiftCodeValidator(Validator countryCodeValidator) {
-        if (countryCodeValidator == null) {
-            throw new IllegalArgumentException("Supplied validator [CountryCodeValidator] is required and must not be null.");
-        }
-        if (!countryCodeValidator.supports(String.class)) {
-            throw new IllegalArgumentException("Supplied validator [CountryCodeValidator] must support the validation of [String] instances.");
-        }
-
         this.countryCodeValidator = countryCodeValidator;
     }
 
@@ -30,16 +21,16 @@ public class SwiftCodeValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         String swiftCode = (String) target;
+        String bankCode = swiftCode.substring(0, 4);
         isLengthCorrect(swiftCode, errors);
         if (errors.hasErrors()) return;
 
-        String bankCode = swiftCode.substring(0,4);
-        String countryCode = swiftCode.substring(4,6);
-        String locationCode = swiftCode.substring(6,8);
+        String countryCode = swiftCode.substring(4, 6);
+        String locationCode = swiftCode.substring(6, 8);
         String branchCode = swiftCode.substring(8);
 
-        isBankCodeValid(bankCode, errors);
         invokeValidator(countryCodeValidator, countryCode, errors);
+        isBankCodeValid(bankCode, errors);
         isLocationCodeValid(locationCode, errors);
         isBranchCodeValid(branchCode, errors);
     }
@@ -58,15 +49,13 @@ public class SwiftCodeValidator implements Validator {
 
     private void isLocationCodeValid(String locationCode, Errors errors) {
         if (!locationCode.matches("^[A-Z0-9]{2}$")) {
-            errors.reject("swiftCode.location.code.invalid",
-                    "Location code must contain 2 alphanumeric characters");
+            errors.reject("swiftCode.location.code.invalid", "Location code must contain 2 alphanumeric characters");
         }
     }
 
     private void isBranchCodeValid(String branchCode, Errors errors) {
         if (!branchCode.matches("^[A-Z0-9]{3}$")) {
-            errors.reject("swiftCode.branch.code.invalid",
-                    "Branch code must be 'XXX' for head office or 3 alphanumeric characters");
+            errors.reject("swiftCode.branch.code.invalid", "Branch code must be 'XXX' for head office or 3 alphanumeric characters");
         }
     }
 }

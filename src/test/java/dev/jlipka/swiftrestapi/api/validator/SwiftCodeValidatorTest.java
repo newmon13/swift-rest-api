@@ -1,16 +1,13 @@
 package dev.jlipka.swiftrestapi.api.validator;
 
 import dev.jlipka.swiftrestapi.domain.model.Bank;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
@@ -19,26 +16,15 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SwiftCodeValidatorTest {
-    @Mock
-    CountryCodeValidator countryCodeValidator;
     SwiftCodeValidator swiftCodeValidator;
 
     @BeforeEach
     void setUp() {
-        when(countryCodeValidator.supports(String.class)).thenReturn(true);
+        CountryCodeValidator countryCodeValidator = new CountryCodeValidator();
         swiftCodeValidator = new SwiftCodeValidator(countryCodeValidator);
-    }
-
-    @Test
-    void shouldThrowIllegalArgumentExceptionWhenInitializedValidatorWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            swiftCodeValidator = new SwiftCodeValidator(null);
-        });
     }
 
     @Test
@@ -155,13 +141,13 @@ class SwiftCodeValidatorTest {
 
 
     @Test
-    void shouldContainAllPossibleErrorsExceptCountryCodeOne() {
+    void shouldContainAllPossibleErrors() {
         //given
         String swiftCode= ",,,,,,,,,,,";
         Errors errors = new BeanPropertyBindingResult(swiftCode, "swiftCode");
         //when
         swiftCodeValidator.validate(swiftCode, errors);
         //then
-        assertThat(errors.getAllErrors()).hasSize(3);
+        assertThat(errors.getAllErrors()).hasSize(4);
     }
 }

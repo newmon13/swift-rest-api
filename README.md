@@ -70,11 +70,13 @@ Example File with banks can be uploaded via swagger
 
 1. Go to http://localhost:8080/swagger-ui/index.html#/
 2. Press 'Try it out'
-3. 
+   
 ![image](https://github.com/user-attachments/assets/660edaa7-b6e2-40fe-af5c-4efb9f94f06a)
+
 4. Select proper menu option according to spreadsheet structure (true -> will skip first row that has headers row)
    
 ![image](https://github.com/user-attachments/assets/2c282826-4c03-4ce2-bfa0-6c2dc0708387)
+
 6. Select file and press 'Execute'
    
 ![image](https://github.com/user-attachments/assets/c7d46bc2-b1cd-4fcb-b664-8c4faba88d73)

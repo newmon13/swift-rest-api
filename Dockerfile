@@ -1,8 +1,12 @@
-FROM eclipse-temurin:19-jre-alpine
-
+FROM maven:3.9-eclipse-temurin-19 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package
 
-COPY target/swift-rest-api-0.0.1-SNAPSHOT.jar app.jar
+FROM eclipse-temurin:19-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 
 ENV JAVA_OPTS=""
 ENV SPRING_DATA_MONGODB_HOST=mongo

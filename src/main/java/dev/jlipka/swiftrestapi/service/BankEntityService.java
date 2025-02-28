@@ -1,24 +1,31 @@
 package dev.jlipka.swiftrestapi.service;
 
-import dev.jlipka.swiftrestapi.api.dto.*;
-import dev.jlipka.swiftrestapi.api.mapper.BankMapper;
-import dev.jlipka.swiftrestapi.api.mapper.BranchBankFullDetailsDtoMapper;
-import dev.jlipka.swiftrestapi.api.mapper.HeadquarterBankDetailsMapper;
-import dev.jlipka.swiftrestapi.api.mapper.CountryWithBanksResponseDtoMapper;
+import dev.jlipka.swiftrestapi.api.dto.Branch;
+import dev.jlipka.swiftrestapi.api.dto.CountrySwiftCodes;
+import dev.jlipka.swiftrestapi.api.dto.FailedImport;
+import dev.jlipka.swiftrestapi.api.dto.Headquarter;
+import dev.jlipka.swiftrestapi.api.mapper.dto.BankDtoMapper;
+import dev.jlipka.swiftrestapi.api.mapper.entity.BankMapper;
+import dev.jlipka.swiftrestapi.api.validator.BankValidator;
+import dev.jlipka.swiftrestapi.domain.model.Bank;
 import dev.jlipka.swiftrestapi.domain.model.BankType;
 import dev.jlipka.swiftrestapi.infrastructure.error.BankNotFoundException;
 import dev.jlipka.swiftrestapi.infrastructure.error.DuplicateResourceException;
 import dev.jlipka.swiftrestapi.infrastructure.error.ValidationException;
-import dev.jlipka.swiftrestapi.domain.model.Bank;
 import dev.jlipka.swiftrestapi.repository.BankRepository;
-import dev.jlipka.swiftrestapi.api.validator.BankValidator;
-import dev.jlipka.swiftrestapi.api.validator.CountryCodeValidator;
-import dev.jlipka.swiftrestapi.api.validator.SwiftCodeValidator;
+import org.apache.commons.lang3.function.TriFunction;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.*;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyList;
@@ -30,37 +37,22 @@ public class BankEntityService implements EntityService<Bank> {
     private static final int DEFAULT_SWIFT_CODE_LENGTH = 8;
     private final BankRepository bankRepository;
     private final BankValidator bankValidator;
-    private final BankMapper bankMapper;
-    private final HeadquarterBankDetailsMapper headquarterBankDetailsMapper;
-    private final BranchBankFullDetailsDtoMapper branchBankFullDetailsDtoMapper;
-    private final CountryWithBanksResponseDtoMapper countryWithBanksMapper;
-    private final CountryCodeValidator countryCodeValidator;
-    private final SwiftCodeValidator swiftCodeValidator;
+    private final BankDtoMapper bankDtoMapper;
 
-    public BankEntityService(BankRepository bankRepository,
-                             BankValidator bankValidator,
-                             BankMapper bankMapper,
-                             HeadquarterBankDetailsMapper headquarterBankDetailsMapper,
-                             BranchBankFullDetailsDtoMapper branchBankFullDetailsDtoMapper,
-                             CountryWithBanksResponseDtoMapper countryWithBanksMapper,
-                             CountryCodeValidator countryCodeValidator,
-                             SwiftCodeValidator swiftCodeValidator) {
+    public BankEntityService(BankRepository bankRepository, BankValidator bankValidator, BankDtoMapper bankDtoMapper) {
         this.bankRepository = bankRepository;
         this.bankValidator = bankValidator;
-        this.bankMapper = bankMapper;
-        this.headquarterBankDetailsMapper = headquarterBankDetailsMapper;
-        this.branchBankFullDetailsDtoMapper = branchBankFullDetailsDtoMapper;
-        this.countryWithBanksMapper = countryWithBanksMapper;
-        this.countryCodeValidator = countryCodeValidator;
-        this.swiftCodeValidator = swiftCodeValidator;
+        this.bankDtoMapper = bankDtoMapper;
     }
 
-    public CountryWithBanksResponseDto findByCountryCode(String countryCode) {
-        validate(countryCode, "countryName", countryCodeValidator);
+    public CountrySwiftCodes findByCountryCode(String countryCode) {
+        validate(countryCode, "countryName", bankValidator.getCountryCodeValidator());
 
         List<Bank> foundBanks = bankRepository.findByCountryCode(countryCode);
         String countryName = getCountryName(countryCode);
-        return countryWithBanksMapper.apply(countryCode, countryName, foundBanks);
+        TriFunction<String, String, List<Bank>, CountrySwiftCodes> countrySwiftCodesMapFunction = bankDtoMapper.toCountrySwiftCodes();
+
+        return countrySwiftCodesMapFunction.apply(countryCode, countryName, foundBanks);
     }
 
     private String getCountryName(String countryCode) {
@@ -68,8 +60,8 @@ public class BankEntityService implements EntityService<Bank> {
         return locale.getDisplayCountry();
     }
 
-    public BankResponseDto findBySwiftCode(String swiftCode) {
-        validate(swiftCode, "swiftCode", swiftCodeValidator);
+    public Branch findBySwiftCode(String swiftCode) {
+        validate(swiftCode, "swiftCode", bankValidator.getSwiftCodeValidator());
 
         Bank foundBank = bankRepository.findBySwiftCode(swiftCode)
                 .orElseThrow(() -> new BankNotFoundException("Bank not found for SWIFT code: " + swiftCode));
@@ -77,9 +69,11 @@ public class BankEntityService implements EntityService<Bank> {
         BankType bankType = getBankType(foundBank.getSwiftCode());
 
         if (bankType == BankType.HEADQUARTER) {
-            return headquarterBankDetailsMapper.apply(foundBank, getBankBranches(foundBank));
+            BiFunction<Bank, List<Bank>, Headquarter> headquarterMapperFunction = bankDtoMapper.toHeadquarter();
+            return headquarterMapperFunction.apply(foundBank, getBankBranches(foundBank));
         } else {
-            return branchBankFullDetailsDtoMapper.apply(foundBank);
+            Function<Bank, Branch> branchMapperFunction = bankDtoMapper.toBranch();
+            return branchMapperFunction.apply(foundBank);
         }
     }
 
@@ -107,12 +101,13 @@ public class BankEntityService implements EntityService<Bank> {
         }
     }
 
-    public CrudOperationResponseDto registerBank(BankFullDetailsDto bankFullDetailsDto) {
-        Bank mappedBank = bankMapper.from(bankFullDetailsDto);
+    public Map<String, String> registerBank(Branch bankFullDetailsDto) {
+        Function<Branch, Bank> branchBankFunction = bankDtoMapper.fromBranch();
+        Bank mappedBank = branchBankFunction.apply(bankFullDetailsDto);
         Bank validatedBank = validate(mappedBank, "bank", bankValidator);
         checkForDuplicateResource(validatedBank);
         save(validatedBank);
-        return new CrudOperationResponseDto("Bank created successfully");
+        return Map.of("message", "Bank created successfully");
     }
 
     private BankType getBankType(String swiftCode) {
@@ -124,7 +119,8 @@ public class BankEntityService implements EntityService<Bank> {
     }
 
     private void checkForDuplicateResource(Bank bank) {
-        if (bankRepository.findBySwiftCode(bank.getSwiftCode()).isPresent()) {
+        if (bankRepository.findBySwiftCode(bank.getSwiftCode())
+                .isPresent()) {
             throw new DuplicateResourceException("Bank with code " + bank.getSwiftCode() + " already exists");
         }
     }
@@ -133,7 +129,7 @@ public class BankEntityService implements EntityService<Bank> {
         return swiftCode.substring(0, DEFAULT_SWIFT_CODE_LENGTH);
     }
 
-    public CrudOperationResponseDto unregister(String swiftCode) {
+    public Map<String, String> unregister(String swiftCode) {
         Optional<Bank> bank = bankRepository.findBySwiftCode(swiftCode);
 
         if (bank.isPresent()) {
@@ -146,13 +142,12 @@ public class BankEntityService implements EntityService<Bank> {
                 if (!headquarterBranches.isEmpty()) {
                     bankRepository.saveAll(headquarterBranches);
                 }
-
             }
             bankRepository.delete(foundBank);
         } else {
             throw new BankNotFoundException("No bank with given swift code found");
         }
-        return new CrudOperationResponseDto("Bank deleted successfully");
+        return Map.of("message", "Bank deleted successfully");
     }
 
     @Override
@@ -174,8 +169,6 @@ public class BankEntityService implements EntityService<Bank> {
         }
 
         BankType bankType = getBankType(bank.getSwiftCode());
-
-        //TODO potential need for fix
 
         if (bankType == BankType.HEADQUARTER) {
             Bank savedHeadquarter = bankRepository.save(bank);

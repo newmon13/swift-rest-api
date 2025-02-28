@@ -1,6 +1,6 @@
 # Bank Entity Extraction API
 
-![Java](https://img.shields.io/badge/Java-17-brightgreen)
+![Java](https://img.shields.io/badge/Java-19-brightgreen)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.3-green)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Latest-success)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
@@ -28,8 +28,8 @@ Core functionality:
 
 Nice to have:
 - [x] Edge cases validation
-- [ ] Comprehensive test coverage (unit & integration)
-- [ ] Containerized deployment
+- [x] Comprehensive test coverage (unit & integration)
+- [x] Containerized deployment
 
 ## Technologies
 
@@ -44,17 +44,17 @@ Nice to have:
 ### Prerequisites
 
 - Docker and Docker Compose
-- Java 17 (for local development)
+- Java 19 (for local development)
 
 ### Running with Docker
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/bank-entity-extraction-api.git
+git clone https://github.com/newmon13/swift-rest-api.git
 ```
 2. Navigate to cloned repository folder
 ```bash
-cd bank-entity-extraction-api
+cd swift-rest-api
 ```
 3. Start the application:
 ```bash
@@ -62,3 +62,17 @@ docker-compose up
 ```
 
 The API will be available at http://localhost:8080
+Documentation for API is available under http://localhost:8080/swagger-ui/index.html#/
+
+Example File with banks can be uploaded via swagger
+
+### Uploading spreadsheet data
+
+1. Go to http://localhost:8080/swagger-ui/index.html#/
+2. Press 'Try it out'
+![image](https://github.com/user-attachments/assets/660edaa7-b6e2-40fe-af5c-4efb9f94f06a)
+3. Select proper menu option according to spreadsheet structure (true -> will skip first row that has headers row)
+![image](https://github.com/user-attachments/assets/2c282826-4c03-4ce2-bfa0-6c2dc0708387)
+4. Select file and press 'Execute'
+![image](https://github.com/user-attachments/assets/c7d46bc2-b1cd-4fcb-b664-8c4faba88d73)
+

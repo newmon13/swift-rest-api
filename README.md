@@ -62,6 +62,7 @@ docker-compose up
 ```
 
 The API will be available at http://localhost:8080
+
 Documentation for API is available under http://localhost:8080/swagger-ui/index.html#/
 
 Example File with banks can be uploaded via swagger

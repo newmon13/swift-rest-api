@@ -21,15 +21,15 @@ This service provides functionality to process and manage SWIFT/BIC codes data. 
 ## Features
 
 Core functionality:
-- [x] SWIFT/BIC code data extraction from spreadsheets
-- [x] Automatic detection of headquarters (XXX-ending codes) and branch relationships
-- [x] Data persistence with MongoDB
-- [x] RESTful API for data access and management
+- ✅ SWIFT/BIC code data extraction from spreadsheets
+- ✅ Automatic detection of headquarters (XXX-ending codes) and branch relationships
+- ✅ Data persistence with MongoDB
+- ✅ RESTful API for data access and management
 
 Nice to have:
-- [x] Edge cases validation
-- [x] Comprehensive test coverage (unit & integration)
-- [x] Containerized deployment
+- ✅ Edge cases validation
+- ✅ Comprehensive test coverage (unit & integration)
+- ✅ Containerized deployment
 
 ## Technologies
 
@@ -62,6 +62,7 @@ docker-compose up
 ```
 
 The API will be available at http://localhost:8080
+
 Documentation for API is available under http://localhost:8080/swagger-ui/index.html#/
 
 Example File with banks can be uploaded via swagger

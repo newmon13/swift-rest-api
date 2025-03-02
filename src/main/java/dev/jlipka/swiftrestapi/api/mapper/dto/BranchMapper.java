@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 
 @Component
@@ -16,7 +16,7 @@ public class BranchMapper implements Function<Bank, Branch> {
         return Branch.builder()
                 .address(bank.getAddress())
                 .bankName(bank.getName())
-                .isHeadquarter(nonNull(bank.getHeadquarter()))
+                .isHeadquarter(isNull(bank.getHeadquarter()))
                 .swiftCode(bank.getSwiftCode())
                 .countryISO2(bank.getCountryCode())
                 .countryName(bank.getCountryName())

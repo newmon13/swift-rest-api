@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 @Component
 public class HeadquarterMapper implements BiFunction<Bank, List<Bank>, Headquarter> {
@@ -29,7 +29,7 @@ public class HeadquarterMapper implements BiFunction<Bank, List<Bank>, Headquart
         return Headquarter.builder()
                 .address(bank.getAddress())
                 .bankName(bank.getName())
-                .isHeadquarter(nonNull(bank.getHeadquarter()))
+                .isHeadquarter(isNull(bank.getHeadquarter()))
                 .swiftCode(bank.getSwiftCode())
                 .countryISO2(bank.getCountryCode())
                 .countryName(bank.getCountryName())

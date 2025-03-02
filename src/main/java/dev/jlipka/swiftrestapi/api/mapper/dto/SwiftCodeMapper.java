@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 @Component
 public class SwiftCodeMapper implements Function<Bank, SwiftCode> {
 
     @Override
     public SwiftCode apply(Bank bank) {
-        return new SwiftCode(bank.getAddress(), bank.getName(), nonNull(bank.getHeadquarter()), bank.getSwiftCode(), bank.getCountryCode());
+        return new SwiftCode(bank.getAddress(), bank.getName(), isNull(bank.getHeadquarter()), bank.getSwiftCode(), bank.getCountryCode());
     }
 }

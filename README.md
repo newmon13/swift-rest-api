@@ -37,7 +37,7 @@ Nice to have:
 - Spring Boot
 - MongoDB
 - Docker
-- JUnit & Mockito for testing
+- JUnit & Mockito & Testcontainers for testing
 
 ## Getting Started
 

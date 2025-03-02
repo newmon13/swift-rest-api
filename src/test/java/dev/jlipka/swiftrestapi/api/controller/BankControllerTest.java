@@ -1,7 +1,12 @@
 package dev.jlipka.swiftrestapi.api.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jlipka.swiftrestapi.api.dto.BankOffice;
+import dev.jlipka.swiftrestapi.api.dto.Branch;
 import dev.jlipka.swiftrestapi.api.dto.CountrySwiftCodes;
+import dev.jlipka.swiftrestapi.api.dto.Headquarter;
 import dev.jlipka.swiftrestapi.api.dto.ImportResult;
 import dev.jlipka.swiftrestapi.api.dto.SwiftCode;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
@@ -15,6 +20,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +36,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -66,12 +73,17 @@ class BankControllerTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"BKSACLRMXXX, Headquarter.class", "BKSACLRM068, Branch.class"})
-    void shouldFindBankWithSpecificSwiftCode(String swiftCode, Class<?> expectedReturnType) {
-        ResponseEntity<?> forEntity = restTemplate.getForEntity("/v1/swift-codes/" + swiftCode, expectedReturnType);
-        BankOffice bankOffice = (BankOffice) forEntity.getBody();
+    @CsvSource({"BKSACLRMXXX, true", "BKSACLRM068, false"})
+    void shouldFindBankWithSpecificSwiftCode(String swiftCode, boolean isHeadquarter) {
+        ResponseEntity<BankOffice> response = restTemplate.getForEntity(
+                "/v1/swift-codes/" + swiftCode,
+                BankOffice.class
+        );
 
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        BankOffice bankOffice = response.getBody();
+        assertThat(bankOffice).isNotNull();
         assertThat(bankOffice.getSwiftCode()).isEqualTo(swiftCode);
+        assertThat(bankOffice.isHeadquarter()).isEqualTo(isHeadquarter);
     }
-
 }

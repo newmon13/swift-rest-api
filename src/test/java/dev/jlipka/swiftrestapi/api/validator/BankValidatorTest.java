@@ -50,7 +50,6 @@ class BankValidatorTest {
                 .isEqualTo("country.name.empty");
     }
 
-
     @Test
     void shouldContainCountryNameEmptyErrorWhenPassedBankObjectWithEmptyStringAsCountryCode() {
         //given
@@ -96,15 +95,7 @@ class BankValidatorTest {
     @Test
     void shouldContainBankPropertyCountryNameMismatchError() {
         //given
-        Bank bank = new Bank("AAAAPLAAAAA",
-                "PL",
-                "testCodeType",
-                "testBankName",
-                "testAddress",
-                "testTownName",
-                "GERMANY",
-                "testCountryZone",
-                null);
+        Bank bank = new Bank("AAAAPLAAAAA", "PL", "testCodeType", "testBankName", "testAddress", "testTownName", "GERMANY", "testCountryZone", null);
         Errors errors = new BeanPropertyBindingResult(bank, "bank");
         //when
         bankValidator.validate(bank, errors);
@@ -115,9 +106,10 @@ class BankValidatorTest {
                 .anyMatch(code -> code.equals("bank.property.countryISO2.countryName.mismatch"));
 
 
-
-        errors.getAllErrors().stream().flatMap(objectError ->
-                Arrays.stream(Objects.requireNonNull(objectError.getCodes()))).forEach(System.out::println);
+        errors.getAllErrors()
+                .stream()
+                .flatMap(objectError -> Arrays.stream(Objects.requireNonNull(objectError.getCodes())))
+                .forEach(System.out::println);
 
         assertThat(foundCode).isTrue();
     }
@@ -126,15 +118,7 @@ class BankValidatorTest {
     @Test
     void shouldContainBankPropertyCountryISO2MismatchError() {
         //given
-        Bank bank = new Bank("AAAAFRAAAAA",
-                "PL",
-                "testCodeType",
-                "testBankName",
-                "testAddress",
-                "testTownName",
-                "POLAND",
-                "testCountryZone",
-                null);
+        Bank bank = new Bank("AAAAFRAAAAA", "PL", "testCodeType", "testBankName", "testAddress", "testTownName", "POLAND", "testCountryZone", null);
         Errors errors = new BeanPropertyBindingResult(bank, "bank");
         //when
         bankValidator.validate(bank, errors);

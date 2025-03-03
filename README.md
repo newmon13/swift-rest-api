@@ -33,11 +33,11 @@ Nice to have:
 
 ## Technologies
 
-- Java 17
+- Java 19
 - Spring Boot
 - MongoDB
 - Docker
-- JUnit & Mockito for testing
+- JUnit & Mockito & Testcontainers for testing
 
 ## Getting Started
 
@@ -56,7 +56,9 @@ git clone https://github.com/newmon13/swift-rest-api.git
 ```bash
 cd swift-rest-api
 ```
-3. Start the application:
+3. Make sure docker desktop is running.
+   
+4. Start the application:
 ```bash
 docker-compose up
 ```

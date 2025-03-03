@@ -33,7 +33,7 @@ Nice to have:
 
 ## Technologies
 
-- Java 17
+- Java 19
 - Spring Boot
 - MongoDB
 - Docker

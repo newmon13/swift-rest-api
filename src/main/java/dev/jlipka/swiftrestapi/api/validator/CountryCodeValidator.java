@@ -29,7 +29,7 @@ public class CountryCodeValidator implements Validator {
         }
 
         if (!exists(countryCode)) {
-            errors.reject("country.code.not.found", "No country with given country code was found");
+            errors.reject("country.code.not.found", "No country with given country code was found. Check country code and relevant part of SWIFT code");
         }
     }
 

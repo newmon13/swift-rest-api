@@ -3,6 +3,7 @@ package dev.jlipka.swiftrestapi.api.controller;
 import dev.jlipka.swiftrestapi.api.dto.BankOffice;
 import dev.jlipka.swiftrestapi.api.dto.Branch;
 import dev.jlipka.swiftrestapi.api.dto.CountrySwiftCodes;
+import dev.jlipka.swiftrestapi.api.dto.Headquarter;
 import dev.jlipka.swiftrestapi.api.dto.SwiftCode;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import dev.jlipka.swiftrestapi.service.ExcelService;
@@ -92,6 +93,42 @@ class BankControllerTest {
         assertThat(value).isEqualTo("Bank created successfully");
     }
 
+    @Test
+    void shouldReturnBadRequestAndDetailedMessageWhenCountryCodeNotExists() {
+        Branch testBranchBank = getTestBranchBank();
+        testBranchBank.setCountryISO2("AA");
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                "/v1/swift-codes",
+                testBranchBank,
+                Map.class
+        );
+        Map<String, String> responseMap = response.getBody();
+        String status = responseMap.get("status");
+        String message = responseMap.get("message");
+        assertThat(status).isEqualTo("BAD_REQUEST");
+        assertThat(message).isEqualTo("No country with given country code was found. Check country code and relevant part of SWIFT code");
+    }
+
+    @Test
+    void shouldReturnHeadquarterWithOneBranch() {
+        Branch headquarter = getTestBranchBank();
+        headquarter.setSwiftCode("AAAAPLAAXXX");
+        headquarter.setHeadquarter(true);
+        Branch branch = getTestBranchBank();
+
+        restTemplate.postForEntity("/v1/swift-codes", headquarter, Map.class);
+        restTemplate.postForEntity("/v1/swift-codes", branch, Map.class);
+
+        ResponseEntity<Headquarter> headquarterResponse = restTemplate.getForEntity(
+                "/v1/swift-codes/" + headquarter.getSwiftCode(),
+                Headquarter.class
+        );
+        Headquarter body = headquarterResponse.getBody();
+        assertThat(body.getBranches()).isNotEmpty();
+    }
+
+
+
     private Branch getTestBranchBank() {
         Branch testRegisterNewBankRequest = new Branch();
         testRegisterNewBankRequest.setAddress("Test address");
@@ -99,7 +136,7 @@ class BankControllerTest {
         testRegisterNewBankRequest.setCountryISO2("PL");
         testRegisterNewBankRequest.setCountryName("POLAND");
         testRegisterNewBankRequest.setHeadquarter(false);
-        testRegisterNewBankRequest.setSwiftCode("AAAAAAAAAAA");
+        testRegisterNewBankRequest.setSwiftCode("AAAAPLAAAAA");
         return testRegisterNewBankRequest;
     }
 }

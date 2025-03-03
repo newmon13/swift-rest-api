@@ -83,6 +83,7 @@ Example File with banks can be uploaded via swagger
 4. Select file and press 'Execute'
    
 ![image](https://github.com/user-attachments/assets/c7d46bc2-b1cd-4fcb-b664-8c4faba88d73)
-![image](https://github.com/user-attachments/assets/04af2edd-eaba-4dc0-9dde-0a9937e69037)
+![image](https://github.com/user-attachments/assets/8ec1ad52-0425-4b50-8ee0-bc7bc7394f9c)
+
 
 

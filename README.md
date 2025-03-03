@@ -56,7 +56,9 @@ git clone https://github.com/newmon13/swift-rest-api.git
 ```bash
 cd swift-rest-api
 ```
-3. Start the application:
+3. Make sure docker desktop is running.
+   
+4. Start the application:
 ```bash
 docker-compose up
 ```

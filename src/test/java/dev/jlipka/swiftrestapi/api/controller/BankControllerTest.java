@@ -1,17 +1,13 @@
 package dev.jlipka.swiftrestapi.api.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jlipka.swiftrestapi.api.dto.BankOffice;
 import dev.jlipka.swiftrestapi.api.dto.Branch;
 import dev.jlipka.swiftrestapi.api.dto.CountrySwiftCodes;
-import dev.jlipka.swiftrestapi.api.dto.Headquarter;
-import dev.jlipka.swiftrestapi.api.dto.ImportResult;
 import dev.jlipka.swiftrestapi.api.dto.SwiftCode;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import dev.jlipka.swiftrestapi.service.ExcelService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +29,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -75,15 +71,35 @@ class BankControllerTest {
     @ParameterizedTest
     @CsvSource({"BKSACLRMXXX, true", "BKSACLRM068, false"})
     void shouldFindBankWithSpecificSwiftCode(String swiftCode, boolean isHeadquarter) {
-        ResponseEntity<BankOffice> response = restTemplate.getForEntity(
-                "/v1/swift-codes/" + swiftCode,
-                BankOffice.class
-        );
+        ResponseEntity<BankOffice> response = restTemplate.getForEntity("/v1/swift-codes/" + swiftCode, BankOffice.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         BankOffice bankOffice = response.getBody();
         assertThat(bankOffice).isNotNull();
         assertThat(bankOffice.getSwiftCode()).isEqualTo(swiftCode);
         assertThat(bankOffice.isHeadquarter()).isEqualTo(isHeadquarter);
+    }
+
+    @Test
+    void shouldRegisterNewBranchBankWithoutExistingHeadquarter() {
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                "/v1/swift-codes",
+                getTestBranchBank(),
+                Map.class
+        );
+        Map<String, String> responseMap = response.getBody();
+        String value = responseMap.get("message");
+        assertThat(value).isEqualTo("Bank created successfully");
+    }
+
+    private Branch getTestBranchBank() {
+        Branch testRegisterNewBankRequest = new Branch();
+        testRegisterNewBankRequest.setAddress("Test address");
+        testRegisterNewBankRequest.setBankName("Test bank name");
+        testRegisterNewBankRequest.setCountryISO2("PL");
+        testRegisterNewBankRequest.setCountryName("POLAND");
+        testRegisterNewBankRequest.setHeadquarter(false);
+        testRegisterNewBankRequest.setSwiftCode("AAAAAAAAAAA");
+        return testRegisterNewBankRequest;
     }
 }

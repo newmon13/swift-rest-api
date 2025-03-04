@@ -6,7 +6,9 @@ import dev.jlipka.swiftrestapi.api.dto.CountrySwiftCodes;
 import dev.jlipka.swiftrestapi.api.dto.Headquarter;
 import dev.jlipka.swiftrestapi.api.dto.SwiftCode;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
+import dev.jlipka.swiftrestapi.repository.BankRepository;
 import dev.jlipka.swiftrestapi.service.ExcelService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +19,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -49,6 +53,9 @@ class BankControllerTest {
     @Autowired
     private ExcelService<Bank> excelService;
 
+    @Autowired
+    BankRepository bankRepository;
+
     @BeforeEach
     void setUp() throws IOException {
         Resource resource = new ClassPathResource("test.xlsx");
@@ -58,6 +65,11 @@ class BankControllerTest {
         MultipartFile multipartFile = new MockMultipartFile(file.getName(), file.getName(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", IOUtils.toByteArray(input));
 
         excelService.importFile(multipartFile, true);
+    }
+
+    @AfterEach
+    void tearDown() {
+        bankRepository.deleteAll();
     }
 
     @ParameterizedTest
@@ -107,6 +119,8 @@ class BankControllerTest {
         String message = responseMap.get("message");
         assertThat(status).isEqualTo("BAD_REQUEST");
         assertThat(message).isEqualTo("No country with given country code was found. Check country code and relevant part of SWIFT code");
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
     }
 
     @Test
@@ -125,6 +139,24 @@ class BankControllerTest {
         );
         Headquarter body = headquarterResponse.getBody();
         assertThat(body.getBranches()).isNotEmpty();
+        assertThat(headquarterResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void shouldUnregisterBank() {
+        String swiftCode = "BIGBPLPWCUS";
+        ResponseEntity<Map> exchange = restTemplate.exchange("/v1/swift-codes/" + swiftCode, HttpMethod.DELETE, HttpEntity.EMPTY, Map.class);
+        String message = (String) exchange.getBody()
+                .get("message");
+        assertThat(message).isEqualTo("Bank deleted successfully");
+        assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenBankForDeletionDoesNotExist() {
+        String swiftCode = "AAAAPLAAAAA";
+        ResponseEntity<Map> exchange = restTemplate.exchange("/v1/swift-codes/" + swiftCode, HttpMethod.DELETE, HttpEntity.EMPTY, Map.class);
+        assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
 

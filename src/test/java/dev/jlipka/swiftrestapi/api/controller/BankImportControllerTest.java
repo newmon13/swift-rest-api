@@ -1,6 +1,9 @@
 package dev.jlipka.swiftrestapi.api.controller;
 
 
+import dev.jlipka.swiftrestapi.repository.BankRepository;
+import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
@@ -35,32 +39,56 @@ class BankImportControllerTest {
     @Autowired
     TestRestTemplate restTemplate;
 
+    @Autowired
+    BankRepository bankRepository;
+
+    @AfterEach
+    void tearDown() {
+        bankRepository.deleteAll();
+    }
+
     @Test
     void shouldImportExampleFileWithoutFailedImports() {
+        //given
         var multipart = new LinkedMultiValueMap<>();
         multipart.add("file", file("test.xlsx"));
         multipart.add("has_header_row", "true");
+        //when
         final ResponseEntity<Map> response = restTemplate.postForEntity("/excel/bank/import", new HttpEntity<>(multipart, headers()), Map.class);
-        Integer savedEntities = (Integer) response.getBody()
-                .get("saved_entities");
+        //then
+        Integer savedEntities = (Integer) response.getBody().get("saved_entities");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertThat(savedEntities).isEqualTo(12);
     }
 
     @Test
     void shouldImportFileWithFailedImports() {
+        //given
         var multipart = new LinkedMultiValueMap<>();
         multipart.add("file", file("test_with_invalid_banks.xlsx"));
         multipart.add("has_header_row", "true");
+        //when
         final ResponseEntity<Map> response = restTemplate.postForEntity("/excel/bank/import", new HttpEntity<>(multipart, headers()), Map.class);
-        Integer savedEntities = (Integer) response.getBody()
-                .get("saved_entities");
-        List<?> failedImports = (List<?>) response.getBody()
-                .get("failed_imports");
+        //then
+        Integer savedEntities = (Integer) response.getBody().get("saved_entities");
+        List<?> failedImports = (List<?>) response.getBody().get("failed_imports");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertThat(savedEntities).isEqualTo(9);
         assertThat(failedImports.size()).isEqualTo(3);
+    }
 
+    @Test
+    void shouldNotSkipFirstRowAndThenContainOneFailedImportPerEachSheet_2() {
+        //given
+        var multipart = new LinkedMultiValueMap<>();
+        multipart.add("file", file("test.xlsx"));
+        multipart.add("has_header_row", "false");
+        //when
+        final ResponseEntity<Map> response = restTemplate.postForEntity("/excel/bank/import", new HttpEntity<>(multipart, headers()), Map.class);
+        //then
+        List<?> failedImports = (List<?>) response.getBody().get("failed_imports");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertThat(failedImports.size()).isEqualTo(2);
     }
 
     private HttpHeaders headers() {

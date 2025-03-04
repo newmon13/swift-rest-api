@@ -1,8 +1,6 @@
 package dev.jlipka.swiftrestapi.api.controller;
 
-
 import dev.jlipka.swiftrestapi.repository.BankRepository;
-import org.junit.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
@@ -56,7 +53,8 @@ class BankImportControllerTest {
         //when
         final ResponseEntity<Map> response = restTemplate.postForEntity("/excel/bank/import", new HttpEntity<>(multipart, headers()), Map.class);
         //then
-        Integer savedEntities = (Integer) response.getBody().get("saved_entities");
+        Integer savedEntities = (Integer) response.getBody()
+                .get("saved_entities");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertThat(savedEntities).isEqualTo(12);
     }
@@ -70,8 +68,10 @@ class BankImportControllerTest {
         //when
         final ResponseEntity<Map> response = restTemplate.postForEntity("/excel/bank/import", new HttpEntity<>(multipart, headers()), Map.class);
         //then
-        Integer savedEntities = (Integer) response.getBody().get("saved_entities");
-        List<?> failedImports = (List<?>) response.getBody().get("failed_imports");
+        Integer savedEntities = (Integer) response.getBody()
+                .get("saved_entities");
+        List<?> failedImports = (List<?>) response.getBody()
+                .get("failed_imports");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertThat(savedEntities).isEqualTo(9);
         assertThat(failedImports.size()).isEqualTo(3);
@@ -86,7 +86,8 @@ class BankImportControllerTest {
         //when
         final ResponseEntity<Map> response = restTemplate.postForEntity("/excel/bank/import", new HttpEntity<>(multipart, headers()), Map.class);
         //then
-        List<?> failedImports = (List<?>) response.getBody().get("failed_imports");
+        List<?> failedImports = (List<?>) response.getBody()
+                .get("failed_imports");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertThat(failedImports.size()).isEqualTo(2);
     }

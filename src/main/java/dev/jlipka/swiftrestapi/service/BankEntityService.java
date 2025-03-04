@@ -5,7 +5,6 @@ import dev.jlipka.swiftrestapi.api.dto.CountrySwiftCodes;
 import dev.jlipka.swiftrestapi.api.dto.FailedImport;
 import dev.jlipka.swiftrestapi.api.dto.Headquarter;
 import dev.jlipka.swiftrestapi.api.mapper.dto.BankDtoMapper;
-import dev.jlipka.swiftrestapi.api.mapper.entity.BankMapper;
 import dev.jlipka.swiftrestapi.api.validator.BankValidator;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
 import dev.jlipka.swiftrestapi.domain.model.BankType;

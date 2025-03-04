@@ -16,7 +16,7 @@ public class BranchMapper implements Function<Bank, Branch> {
         return Branch.builder()
                 .address(bank.getAddress())
                 .bankName(bank.getName())
-                .isHeadquarter(isNull(bank.getHeadquarter()))
+                .isHeadquarter(bank.getSwiftCode().endsWith("XXX"))
                 .swiftCode(bank.getSwiftCode())
                 .countryISO2(bank.getCountryCode())
                 .countryName(bank.getCountryName())

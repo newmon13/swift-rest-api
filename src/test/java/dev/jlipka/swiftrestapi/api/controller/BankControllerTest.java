@@ -75,17 +75,19 @@ class BankControllerTest {
     @ParameterizedTest
     @CsvSource({"PL, 3", "MC, 2", "CL, 5"})
     void shouldFindAllBanksByCountryCode(String countryCode, int expectedCount) {
+        //when
         ResponseEntity<CountrySwiftCodes> forEntity = restTemplate.getForEntity("/v1/swift-codes/country/" + countryCode, CountrySwiftCodes.class);
-        List<SwiftCode> swiftCodes = Objects.requireNonNull(forEntity.getBody())
-                .swiftCodes();
+        //then
+        List<SwiftCode> swiftCodes = Objects.requireNonNull(forEntity.getBody()).swiftCodes();
         assertThat(swiftCodes.size()).isEqualTo(expectedCount);
     }
 
     @ParameterizedTest
     @CsvSource({"BKSACLRMXXX, true", "BKSACLRM068, false"})
     void shouldFindBankWithSpecificSwiftCode(String swiftCode, boolean isHeadquarter) {
+        //when
         ResponseEntity<BankOffice> response = restTemplate.getForEntity("/v1/swift-codes/" + swiftCode, BankOffice.class);
-
+        //then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         BankOffice bankOffice = response.getBody();
         assertThat(bankOffice).isNotNull();
@@ -95,11 +97,13 @@ class BankControllerTest {
 
     @Test
     void shouldRegisterNewBranchBankWithoutExistingHeadquarter() {
+        //when
         ResponseEntity<Map> response = restTemplate.postForEntity(
                 "/v1/swift-codes",
                 getTestBranchBank(),
                 Map.class
         );
+        //then
         Map<String, String> responseMap = response.getBody();
         String value = responseMap.get("message");
         assertThat(value).isEqualTo("Bank created successfully");
@@ -107,13 +111,16 @@ class BankControllerTest {
 
     @Test
     void shouldReturnBadRequestAndDetailedMessageWhenCountryCodeNotExists() {
+        //given
         Branch testBranchBank = getTestBranchBank();
         testBranchBank.setCountryISO2("AA");
+        //when
         ResponseEntity<Map> response = restTemplate.postForEntity(
                 "/v1/swift-codes",
                 testBranchBank,
                 Map.class
         );
+        //then
         Map<String, String> responseMap = response.getBody();
         String status = responseMap.get("status");
         String message = responseMap.get("message");
@@ -125,11 +132,12 @@ class BankControllerTest {
 
     @Test
     void shouldReturnHeadquarterWithOneBranch() {
+        //given
         Branch headquarter = getTestBranchBank();
         headquarter.setSwiftCode("AAAAPLAAXXX");
         headquarter.setHeadquarter(true);
         Branch branch = getTestBranchBank();
-
+        //when
         restTemplate.postForEntity("/v1/swift-codes", headquarter, Map.class);
         restTemplate.postForEntity("/v1/swift-codes", branch, Map.class);
 
@@ -137,6 +145,7 @@ class BankControllerTest {
                 "/v1/swift-codes/" + headquarter.getSwiftCode(),
                 Headquarter.class
         );
+        //then
         Headquarter body = headquarterResponse.getBody();
         assertThat(body.getBranches()).isNotEmpty();
         assertThat(headquarterResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -144,22 +153,25 @@ class BankControllerTest {
 
     @Test
     void shouldUnregisterBank() {
+        //given
         String swiftCode = "BIGBPLPWCUS";
+        //when
         ResponseEntity<Map> exchange = restTemplate.exchange("/v1/swift-codes/" + swiftCode, HttpMethod.DELETE, HttpEntity.EMPTY, Map.class);
-        String message = (String) exchange.getBody()
-                .get("message");
+        //then
+        String message = (String) exchange.getBody().get("message");
         assertThat(message).isEqualTo("Bank deleted successfully");
         assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void shouldReturnNotFoundWhenBankForDeletionDoesNotExist() {
+        //given
         String swiftCode = "AAAAPLAAAAA";
+        //when
         ResponseEntity<Map> exchange = restTemplate.exchange("/v1/swift-codes/" + swiftCode, HttpMethod.DELETE, HttpEntity.EMPTY, Map.class);
+        //then
         assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
-
-
 
     private Branch getTestBranchBank() {
         Branch testRegisterNewBankRequest = new Branch();

@@ -28,8 +28,7 @@ Core functionality:
 
 Nice to have:
 - ✅ Edge cases validation
-- ✅ Comprehensive test coverage (unit & integration) ![image](https://github.com/user-attachments/assets/f326658e-a49e-43e1-91c7-810f500da175)
-
+- ✅ Comprehensive test coverage (unit & integration) ![image](https://github.com/user-attachments/assets/83f3bf59-bff5-4610-97d2-912e3a963939)
 - ✅ Containerized deployment
 
 ## Technologies

@@ -4,6 +4,7 @@ import dev.jlipka.swiftrestapi.api.dto.Branch;
 import dev.jlipka.swiftrestapi.api.dto.CountrySwiftCodes;
 import dev.jlipka.swiftrestapi.api.dto.Headquarter;
 import dev.jlipka.swiftrestapi.domain.model.Bank;
+import dev.jlipka.swiftrestapi.infrastructure.error.BankNotFoundException;
 import dev.jlipka.swiftrestapi.infrastructure.error.ValidationException;
 import dev.jlipka.swiftrestapi.repository.BankRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -24,6 +25,7 @@ import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,9 +71,8 @@ class ExcelServiceTest {
         CountrySwiftCodes byCountryCode = bankEntityService.findByCountryCode(countryCode);
         //then
         assertThat(byCountryCode.countryISO2()).isEqualTo(countryCode);
-        byCountryCode.swiftCodes().stream().forEach(bank -> {
-            assertThat(bank.getCountryISO2()).isEqualTo(countryCode);
-        });
+        byCountryCode.swiftCodes()
+                .forEach(bank -> assertThat(bank.getCountryISO2()).isEqualTo(countryCode));
     }
 
     @Test
@@ -79,9 +80,7 @@ class ExcelServiceTest {
         //given
         String countryCode = "INVALID CODE";
         //when & then
-        assertThrows(ValidationException.class, () -> {
-            bankEntityService.findByCountryCode(countryCode);
-        });
+        assertThrows(ValidationException.class, () -> bankEntityService.findByCountryCode(countryCode));
     }
 
     @Test
@@ -89,9 +88,7 @@ class ExcelServiceTest {
         //given
         String countryCode = "AA";
         //when & then
-        assertThrows(ValidationException.class, () -> {
-            bankEntityService.findByCountryCode(countryCode);
-        });
+        assertThrows(ValidationException.class, () -> bankEntityService.findByCountryCode(countryCode));
     }
 
     @Test
@@ -114,9 +111,7 @@ class ExcelServiceTest {
         assertThat(bySwiftCode.getSwiftCode()).isEqualTo(swiftCode);
         assertThat(bySwiftCode.getBranches()).isNotEmpty();
         bySwiftCode.getBranches()
-                .forEach(bank -> {
-            assertThat(bank.getSwiftCode()).containsSubsequence(swiftCode.substring(0,8));
-        });
+                .forEach(bank -> assertThat(bank.getSwiftCode()).containsSubsequence(swiftCode.substring(0,8)));
     }
 
     @Test
@@ -124,9 +119,7 @@ class ExcelServiceTest {
         //given
         String swiftCode = "INVALID SWIFT CODE";
         //when & then
-        assertThrows(ValidationException.class, () -> {
-            bankEntityService.findBySwiftCode(swiftCode);
-        });
+        assertThrows(ValidationException.class, () -> bankEntityService.findBySwiftCode(swiftCode));
     }
 
     @Test
@@ -154,6 +147,60 @@ class ExcelServiceTest {
                 .usingRecursiveComparison()
                 .comparingOnlyFields("swiftCode", "bankName", "address", "countryISO2", "countryName", "isHeadquarter")
                 .isEqualTo(newBank);
+    }
+
+    @Test
+    void shouldAddNewBranchBankAndThenAssignToItExistingHeadquarter() {
+        //given
+        Branch headquarter = getExampleBranchBank();
+        headquarter.setSwiftCode("AAAAPLAAXXX");
+        headquarter.setHeadquarter(true);
+        bankEntityService.registerBank(headquarter);
+        Branch branch = getExampleBranchBank();
+        bankEntityService.registerBank(branch);
+        //when
+        Headquarter bySwiftCode = (Headquarter) bankEntityService.findBySwiftCode(headquarter.getSwiftCode());
+        //then
+        assertThat(bySwiftCode.getBranches()).isNotEmpty();
+        assertThat(bySwiftCode.getBranches().stream().anyMatch(
+                swiftCode -> swiftCode.getSwiftCode().equals(branch.getSwiftCode()))).isTrue();
+        assertThat(bankRepository.findBySwiftCode(branch.getSwiftCode()).get().getHeadquarter().getSwiftCode())
+                .isEqualTo(headquarter.getSwiftCode());
+    }
+
+    @Test
+    void shouldUnregisterExistingBranchBank() {
+        //given
+        Branch branch = getExampleBranchBank();
+        bankEntityService.registerBank(branch);
+        //when
+        Map<String, String> result = bankEntityService.unregister(branch.getSwiftCode());
+        //then
+        assertThat(result.get("message")).isEqualTo("Bank deleted successfully");
+        assertThrows(BankNotFoundException.class, () -> bankEntityService.findBySwiftCode(branch.getSwiftCode()));
+        assertThat(bankRepository.findBySwiftCode(branch.getSwiftCode())).isEmpty();
+    }
+
+    @Test
+    void shouldThrowBankNotFoundExceptionWhenBankDoesNotExist() {
+        //when & then
+        assertThrows(BankNotFoundException.class, () -> bankEntityService.unregister("AAAAPLAAAAA"));
+    }
+
+    @Test
+    void shouldUnregisterHeadquarterAndUpdateItsExistingBranches() {
+        //given
+        Branch headquarter = getExampleBranchBank();
+        headquarter.setSwiftCode("AAAAPLAAXXX");
+        headquarter.setHeadquarter(true);
+        bankEntityService.registerBank(headquarter);
+        Branch branch = getExampleBranchBank();
+        bankEntityService.registerBank(branch);
+        //when
+        Map<String, String> unregister = bankEntityService.unregister(headquarter.getSwiftCode());
+        //then
+        assertThat(unregister.get("message")).isEqualTo("Bank deleted successfully");
+        assertThat(bankRepository.findBySwiftCode(branch.getSwiftCode()).get().getHeadquarter()).isNull();
     }
 
     private Branch getExampleBranchBank() {
